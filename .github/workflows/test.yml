@@ -1,0 +1,32 @@
+on:
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+        type: choice
+        options:
+        - info
+        - warning
+        - debug
+      print_tags:
+        description: 'Use stdout'
+        required: true
+        type: boolean
+      environment:
+        description: 'Environment'
+        type: environment
+        required: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-test
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Who am I ?
+      run: |
+        echo -e "github.actor: ${{ github.actor }}"
