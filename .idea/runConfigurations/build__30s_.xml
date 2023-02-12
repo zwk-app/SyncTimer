@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="build (30s)" type="GoApplicationRunConfiguration" factoryName="Go Application" show_console_on_std_err="true" show_console_on_std_out="true">
+    <module name="SyncTimer" />
+    <working_directory value="$PROJECT_DIR$" />
+    <parameters value="--delay=30" />
+    <kind value="PACKAGE" />
+    <package value="SyncTimer" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$/main.go" />
+    <method v="2" />
+  </configuration>
+</component>
