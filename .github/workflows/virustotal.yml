@@ -1,0 +1,24 @@
+# https://github.com/marketplace/actions/virustotal-github-action
+
+name: VirusTotal
+
+on:
+  release:
+    types: [ "published" ]
+
+jobs:
+  virustotal:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      deployments: write
+      packages: write
+      security-events: write
+    steps:
+    - name: VirusTotal GitHub Action
+      uses: crazy-max/ghaction-virustotal@v3.2.0
+      with:
+        vt_api_key: ${{ secrets.VIRUS_TOTAL_API_KEY }}
+        update_release_body: true
+        files: |
+          .exe$
