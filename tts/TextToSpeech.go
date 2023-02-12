@@ -152,19 +152,19 @@ func (tts *TextToSpeech) GenerateAudioFiles() {
 	tts.Create(name, mesg)
 	for i := 1; i <= 3; i++ {
 		name = fmt.Sprintf("target-%02d-hours", i)
-		mesg = fmt.Sprintf("Target in %d hours", i)
+		mesg = fmt.Sprintf("%d hours left", i)
 		tts.Create(name, mesg)
 		time.Sleep(500 * time.Millisecond)
 	}
 	for i := 5; i <= 60; i += 5 {
 		name = fmt.Sprintf("target-%02d-minutes", i)
-		mesg = fmt.Sprintf("Target in %d minutes", i)
+		mesg = fmt.Sprintf("%d minutes left", i)
 		tts.Create(name, mesg)
 		time.Sleep(500 * time.Millisecond)
 	}
 	for i := 5; i <= 60; i += 5 {
 		name = fmt.Sprintf("target-%02d-seconds", i)
-		mesg = fmt.Sprintf("Target in %d seconds", i)
+		mesg = fmt.Sprintf("%d seconds left", i)
 		tts.Create(name, mesg)
 		time.Sleep(500 * time.Millisecond)
 	}
