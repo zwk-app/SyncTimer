@@ -1,10 +1,10 @@
 ## Security Policy
 
-### ?? Supported Versions
+### ⚠️ Supported Versions
 
 Only [latest](https://github.com/zwk-app/SyncTimer/releases/latest) version is supported.
 
 
-### ? Reporting a Vulnerability
+### 🚨 Reporting a Vulnerability
 
 Please create a new [security issue](https://github.com/zwk-app/SyncTimer/security/advisories/new).
