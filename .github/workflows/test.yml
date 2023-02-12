@@ -31,4 +31,6 @@ jobs:
     steps:
     - name: Who am I ?
       run: |
-        echo -e "github.actor: ${{ github.actor }}"
+        echo -e "GitHub Actor    : ${{ github.actor }}"
+        echo -e "Committed by    : ${{ github.event.commits[0].author.name }}"
+        echo -e "Pull Request by : ${{ github.event.pull_request.user.login }}"
