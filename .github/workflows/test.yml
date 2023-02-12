@@ -3,23 +3,25 @@ name: Test
 on:
   workflow_dispatch:
     inputs:
+      environment:
+        description: 'Environment'
+        required: true
+        type: environment
+        default: 'default'
       logLevel:
         description: 'Log level'
         required: true
-        default: 'warning'
         type: choice
         options:
-        - info
-        - warning
-        - debug
+          - info
+          - warning
+          - debug
+        default: 'warning'
       print_tags:
         description: 'Use stdout'
         required: true
         type: boolean
-      environment:
-        description: 'Environment'
-        type: environment
-        required: true
+        default: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-test
@@ -31,6 +33,8 @@ jobs:
     steps:
     - name: Who am I ?
       run: |
+        echo -e "GitHub Workflow : ${{ github.workflow }}"
+        echo -e "GitHub Ref      : ${{ github.ref }}"
         echo -e "GitHub Actor    : ${{ github.actor }}"
         echo -e "Committed by    : ${{ github.event.commits[0].author.name }}"
         echo -e "Pull Request by : ${{ github.event.pull_request.user.login }}"
