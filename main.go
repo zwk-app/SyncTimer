@@ -1,7 +1,7 @@
 package main
 
 import (
-	"SyncTimer/ttm"
+	"SyncTimer/timer"
 	"SyncTimer/tts"
 	"SyncTimer/ui"
 	"embed"
@@ -15,15 +15,15 @@ import (
 	"time"
 )
 
-const mainAppName = "SyncTimer"
-
 const embeddedAudioPath = "audio/"
 
 //go:embed audio/*.mp3
-var embeddedFS embed.FS
-
-var mainAppVersion string
-var mainAppPath string
+var EmbeddedFS embed.FS
+var AppName = "SyncTimer"
+var AppVersion string
+var AppPath string
+var TextToSpeechEngine *tts.TextToSpeech
+var Timer *timer.TargetTimer
 var verbose bool
 var audioPath string
 var generateTTS bool
@@ -32,6 +32,7 @@ var targetDelay string
 
 // FixTimezone https://github.com/golang/go/issues/20455
 func FixTimezone() {
+	//goland:noinspection SpellCheckingInspection
 	out, err := exec.Command("/system/bin/getprop", "persist.sys.timezone").Output()
 	if err != nil {
 		return
@@ -46,38 +47,40 @@ func FixTimezone() {
 func main() {
 	execFullPath, e := os.Executable()
 	if e != nil {
-		log.Printf("%s: %s", mainAppName, e.Error())
+		log.Printf("%s: %s", AppName, e.Error())
 		os.Exit(1)
 	}
-	mainAppPath = filepath.Dir(execFullPath)
-	mainAppVersion = fmt.Sprintf("%d.%d.%02d", MajorVersion, MinorVersion, BuildNumber)
-	tts.SetEmbeddedAudioFS(&embeddedFS, embeddedAudioPath)
-	audioPath = mainAppPath + string(os.PathSeparator) + "audio" + string(os.PathSeparator)
+	AppPath = filepath.Dir(execFullPath)
+	AppVersion = fmt.Sprintf("%d.%d.%02d", MajorVersion, MinorVersion, BuildNumber)
+
+	audioPath = AppPath + string(os.PathSeparator) + "audio" + string(os.PathSeparator)
 	flag.BoolVar(&verbose, "verbose", false, "active stdout logs")
 	flag.StringVar(&audioPath, "audioPath", audioPath, "enforce audio local path")
 	flag.BoolVar(&generateTTS, "generate-tts", false, "create TTS files")
 	flag.StringVar(&targetTime, "time", "", "set target time to <hh[mm[ss]]>")
 	flag.StringVar(&targetDelay, "delay", "", "set target time in <[[hh]mm]ss>")
 	flag.Parse()
-	log.SetPrefix(mainAppName + " v" + mainAppVersion + " ")
+	log.SetPrefix(AppName + " v" + AppVersion + " ")
 	if verbose {
 		log.SetOutput(os.Stdout)
 	}
-	ttm.CurrentTargetTime = ttm.NewTime()
-	tts.TextToSpeechEngine = tts.NewTextToSpeech(mainAppName, audioPath, "en")
+	TextToSpeechEngine = tts.NewTextToSpeech(AppName, audioPath, "en")
+	TextToSpeechEngine.SetEmbeddedAudioFS(&EmbeddedFS, embeddedAudioPath)
+	Timer = timer.NewTargetTimer()
+
 	if generateTTS {
-		tts.GenerateAllAudioFiles(mainAppName, audioPath)
+		tts.GenerateAllAudioFiles(AppName, audioPath)
 	} else {
 		FixTimezone()
 		enforceTarget := false
 		if targetTime != "" {
-			_ = ttm.SetCurrentTargetTimeString(targetTime)
+			_ = Timer.SetTargetString(targetTime)
 			enforceTarget = true
 		}
 		if targetDelay != "" {
-			_ = ttm.SetCurrentTargetDelayString(targetDelay)
+			_ = Timer.SetDelayString(targetDelay)
 			enforceTarget = true
 		}
-		ui.MainApp(mainAppName, mainAppVersion, enforceTarget)
+		ui.MainApp(AppName, AppVersion, TextToSpeechEngine, Timer, enforceTarget)
 	}
 }

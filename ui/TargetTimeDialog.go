@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"SyncTimer/ttm"
+	"SyncTimer/timer"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/driver/mobile"
@@ -48,7 +48,7 @@ func (i *TargetEntry) Keyboard() mobile.KeyboardType {
 }
 
 func TargetInputOnChange(s string) {
-	valid := ttm.CheckTimeString(s)
+	valid := timer.CheckTimeString(s)
 	sLen := len(s)
 	switch sLen {
 	case 1, 2, 4, 6:
@@ -65,7 +65,7 @@ func TargetInputOnChange(s string) {
 func TargetTimeDialogOnExit(b bool) {
 	log.Println("TargetTimeDialogOnExit")
 	if b {
-		valid := ttm.SetCurrentTargetTimeString(targetInput.Text)
+		valid := Timer.SetTargetString(targetInput.Text)
 		if !valid {
 			log.Printf("TargetTimeDialogOnExit invalid: %s", targetInput.Text)
 		}
