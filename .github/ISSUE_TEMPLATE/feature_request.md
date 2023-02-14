@@ -33,6 +33,6 @@ assignees: ''
 
 
 ### Additional information
-*any other usefull information or screenshots*
+*any other useful information or screenshots*
 
 
