@@ -1,8 +1,8 @@
 package tools
 
 import (
+	"SyncTimer/audio"
 	"SyncTimer/timer"
-	"SyncTimer/tts"
 	"embed"
 	"encoding/json"
 	"flag"
@@ -27,12 +27,12 @@ type AppEngine struct {
 		StdOut   bool   `json:"stdout"`
 		FileName string `json:"log"`
 	}
-	TextToSpeech struct {
-		Object       *tts.TextToSpeech
+	Audio struct {
+		Object       *audio.TextToSpeech
 		Embedded     bool
 		EmbeddedPath string
 		LocalPath    string `json:"audioPath"`
-		GenerateTTS  bool   `json:"generate-tts"`
+		GenerateTTS  bool   `json:"generate-audio"`
 	}
 	Timer struct {
 		Object        *timer.TargetTimer
@@ -42,11 +42,15 @@ type AppEngine struct {
 		EnforceTarget bool
 	}
 	Alerts struct {
-		TextToSpeech  bool
-		Notifications bool
+		TextToSpeech     bool
+		Notifications    bool
+		AlertSound       string
+		AlertSoundNames  []string
+		AlertSoundTitles []string
 	}
 	Fyne struct {
-		App fyne.App
+		App        fyne.App
+		MainWindow fyne.Window
 	}
 	ProxyString string `json:"proxy"`
 }
@@ -67,11 +71,11 @@ func NewAppEngine(appName string, major int, minor int, build int, appEmbeddedFS
 	c.EmbeddedFS = appEmbeddedFS
 	c.Logs.StdOut = false
 	c.Logs.FileName = ""
-	c.TextToSpeech.Object = nil
-	c.TextToSpeech.Embedded = true
-	c.TextToSpeech.EmbeddedPath = "audio/"
-	c.TextToSpeech.LocalPath = path.Clean(c.Path + string(os.PathSeparator) + "audio" + string(os.PathSeparator))
-	c.TextToSpeech.GenerateTTS = false
+	c.Audio.Object = nil
+	c.Audio.Embedded = true
+	c.Audio.EmbeddedPath = "res/audio/"
+	c.Audio.LocalPath = path.Clean(c.Path + string(os.PathSeparator) + "res" + string(os.PathSeparator) + "audio" + string(os.PathSeparator))
+	c.Audio.GenerateTTS = false
 	c.Timer.Object = nil
 	c.Timer.TargetTime = ""
 	c.Timer.TargetDelay = ""
@@ -79,6 +83,9 @@ func NewAppEngine(appName string, major int, minor int, build int, appEmbeddedFS
 	c.Timer.EnforceTarget = false
 	c.Alerts.Notifications = false
 	c.Alerts.TextToSpeech = true
+	c.Alerts.AlertSound = "navy-12-lunch-time"
+	c.Alerts.AlertSoundNames = append(c.Alerts.AlertSoundNames, "navy-01-wanking-of-combat", "navy-02-breakfast", "navy-12-lunch-time", "navy-14-wake-up", "navy-22-wanking-of-combat")
+	c.Alerts.AlertSoundTitles = append(c.Alerts.AlertSoundTitles, "Wanking of Combat (Morning)", "Breakfast Time", "Lunch Time", "Wake Up", "Wanking of Combat (Evening)")
 	c.Fyne.App = nil
 	c.ProxyString = ""
 	return &c
@@ -120,8 +127,8 @@ func (c *AppEngine) LoadArgSettings() *AppEngine {
 	log.Printf("AppEngine->LoadArgSettings")
 	flag.BoolVar(&c.Logs.StdOut, "stdout", c.Logs.StdOut, "Display logs in Stdout")
 	flag.StringVar(&c.Logs.FileName, "log", c.Logs.FileName, "Save logs in file")
-	flag.StringVar(&c.TextToSpeech.LocalPath, "audioPath", c.TextToSpeech.LocalPath, "enforce audio local path")
-	flag.BoolVar(&c.TextToSpeech.GenerateTTS, "generate-tts", c.TextToSpeech.GenerateTTS, "generate all TTS audio files")
+	flag.StringVar(&c.Audio.LocalPath, "audioPath", c.Audio.LocalPath, "enforce audio local path")
+	flag.BoolVar(&c.Audio.GenerateTTS, "generate-audio", c.Audio.GenerateTTS, "generate all TTS audio files")
 	flag.StringVar(&c.Timer.TargetTime, "time", c.Timer.TargetTime, "set target time to <hh[mm[ss]]>")
 	flag.StringVar(&c.Timer.TargetDelay, "delay", c.Timer.TargetDelay, "set target delay in <[[hh]mm]ss>")
 	flag.Parse()
@@ -137,6 +144,7 @@ func (c *AppEngine) LoadFyneSettings() error {
 	c.Timer.LocationName = c.Fyne.App.Preferences().StringWithFallback("currentLocationName", c.Timer.LocationName)
 	c.Alerts.TextToSpeech = c.Fyne.App.Preferences().BoolWithFallback("voiceAlertsEnabled", c.Alerts.TextToSpeech)
 	c.Alerts.Notifications = c.Fyne.App.Preferences().BoolWithFallback("notificationsEnabled", c.Alerts.Notifications)
+	c.Alerts.AlertSound = c.Fyne.App.Preferences().StringWithFallback("alertSound", c.Alerts.AlertSound)
 	return nil
 }
 
@@ -149,6 +157,7 @@ func (c *AppEngine) SaveFyneSettings() error {
 	c.Fyne.App.Preferences().SetString("currentLocationName", c.Timer.LocationName)
 	c.Fyne.App.Preferences().SetBool("voiceAlertsEnabled", c.Alerts.TextToSpeech)
 	c.Fyne.App.Preferences().SetBool("notificationsEnabled", c.Alerts.Notifications)
+	c.Fyne.App.Preferences().SetString("alertSound", c.Alerts.AlertSound)
 	return nil
 }
 
@@ -177,4 +186,13 @@ func (c *AppEngine) Version() string {
 
 func (c *AppEngine) Title() string {
 	return fmt.Sprintf("%s v%s", c.Name(), c.Version())
+}
+
+func (c *AppEngine) AlertName(alertTitle string) string {
+	for i, t := range c.Alerts.AlertSoundTitles {
+		if t == alertTitle {
+			return c.Alerts.AlertSoundNames[i]
+		}
+	}
+	return ""
 }

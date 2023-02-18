@@ -1,4 +1,4 @@
-package tts
+package audio
 
 import (
 	"bytes"
@@ -45,21 +45,24 @@ func (t *TextToSpeech) SetEmbeddedAudioFS(embeddedAudioFS *embed.FS, embeddedAud
 }
 
 func (t *TextToSpeech) GetFileName(name string) string {
-	return t.path + name + "." + t.lang + ".mp3"
+	if strings.HasPrefix(name, "target") || strings.HasPrefix(name, "about") {
+		return t.path + name + "." + t.lang + ".mp3"
+	}
+	return t.path + name + ".mp3"
 }
 
 func (t *TextToSpeech) PlayFile(fileName string) error {
 	embeddedFileName := t.embeddedPath + filepath.Base(fileName)
 	fileBytes, e := t.embeddedFS.ReadFile(embeddedFileName)
 	if e == nil {
-		log.Printf("TextToSpeech->PlayFile embedded:%s", embeddedFileName)
+		log.Printf("Audio->PlayFile embedded:%s", embeddedFileName)
 	} else {
 		fileBytes, e = os.ReadFile(fileName)
 		if e != nil {
-			log.Printf("TextToSpeech->PlayFile ERROR:%s", e.Error())
+			log.Printf("Audio->PlayFile ERROR:%s", e.Error())
 			return e
 		}
-		log.Printf("TextToSpeech->PlayFile local:%s", fileName)
+		log.Printf("Audio->PlayFile local:%s", fileName)
 	}
 	fileDecoder, e := mp3.NewDecoder(bytes.NewReader(fileBytes))
 	if e != nil {
@@ -81,12 +84,12 @@ func (t *TextToSpeech) PlayFile(fileName string) error {
 func (t *TextToSpeech) Play(name string) {
 	e := t.PlayFile(t.GetFileName(name))
 	if e != nil {
-		log.Printf("TextToSpeech->Play ERROR: '%s'", e.Error())
+		log.Printf("Audio->Play ERROR: '%s'", e.Error())
 	}
 }
 
 func (t *TextToSpeech) CreateFile(filename string, message string) error {
-	log.Printf("TextToSpeech->CreateFile '%s'", filename)
+	log.Printf("Audio->CreateFile '%s'", filename)
 	audioFile, e := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0755)
 	if e != nil {
 		return e
@@ -107,10 +110,10 @@ func (t *TextToSpeech) CreateFile(filename string, message string) error {
 }
 
 func (t *TextToSpeech) Create(name string, message string) {
-	log.Printf("TextToSpeech->Create '%s' for '%s'", name, message)
+	log.Printf("Audio->Create '%s' for '%s'", name, message)
 	e := t.CreateFile(t.GetFileName(name), message)
 	if e != nil {
-		log.Printf("TextToSpeech->Create ERROR: '%s'", e.Error())
+		log.Printf("Audio->Create ERROR: '%s'", e.Error())
 	}
 }
 
@@ -134,7 +137,7 @@ func (t *TextToSpeech) PlayOnce(message string) {
 	go func() {
 		tempFileName, e := t.CreateTemp(message)
 		if e != nil {
-			log.Println("TextToSpeech->PlayOnce ERROR: " + e.Error())
+			log.Println("Audio->PlayOnce ERROR: " + e.Error())
 		} else {
 			_ = t.PlayFile(tempFileName)
 			_ = os.Remove(tempFileName)
@@ -143,7 +146,7 @@ func (t *TextToSpeech) PlayOnce(message string) {
 }
 
 func (t *TextToSpeech) GenerateAudioFiles() {
-	log.Printf("TextToSpeech->GenerateAudioFiles for '%s' (%s)", t.name, t.lang)
+	log.Printf("Audio->GenerateAudioFiles for '%s' (%s)", t.name, t.lang)
 	name := "about"
 	mesg := fmt.Sprintf("Hello dear! My name is %s, I am so pleased to meet you!", t.name)
 	t.Create(name, mesg)

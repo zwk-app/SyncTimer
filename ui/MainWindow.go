@@ -5,7 +5,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"image/color"
@@ -14,11 +13,11 @@ import (
 )
 
 var mainWindowInitialized = false
-var mainWindow fyne.Window
-var toolbarMenu *widget.Toolbar
-var toolbarMenuButton *widget.ToolbarAction
-var toolbarTimezoneButton *widget.ToolbarAction
-var toolbarHelpButton *widget.ToolbarAction
+var mainWindowContainer *fyne.Container
+var mainToolbarMenu *widget.Toolbar
+var mainToolbarMenuButton *widget.ToolbarAction
+var mainToolbarTimezoneButton *widget.ToolbarAction
+var mainToolbarHelpButton *widget.ToolbarAction
 var currentColor color.NRGBA
 var currentLabel *canvas.Text
 var currentText *canvas.Text
@@ -31,29 +30,30 @@ var remainingText *canvas.Text
 var locationColor color.NRGBA
 var locationText *canvas.Text
 
-func ToolbarMenuButtonOnClick() {
-	log.Println("ToolbarMenuButtonOnClick")
-	OptionsDialogShow()
+func MainToolbarMenuButtonOnClick() {
+	log.Printf("MainToolbarMenuButtonOnClick")
+	//OptionsDialogShow()
+	ShowSettingsWindow()
 }
 
-func ToolbarHelpButtonOnClick() {
-	log.Println("ToolbarHelpButtonOnClick")
+func MainToolbarHelpButtonOnClick() {
+	log.Printf("MainToolbarHelpButtonOnClick")
 	TextToSpeechAlert("about")
 }
 
 func RefreshDisplayedTimezone() {
 	if appEngine.Timer.Object.GetLocationName() == timer.LocalLocationName {
-		toolbarTimezoneButton.SetIcon(theme.HomeIcon())
+		mainToolbarTimezoneButton.SetIcon(theme.HomeIcon())
 	} else {
-		toolbarTimezoneButton.SetIcon(theme.MediaRecordIcon())
+		mainToolbarTimezoneButton.SetIcon(theme.MediaRecordIcon())
 	}
 	locationText.Text = appEngine.Timer.Object.GetLocationName()
 	locationText.Refresh()
-	toolbarMenu.Refresh()
+	mainToolbarMenu.Refresh()
 }
 
-func ToolbarTimezoneButtonOnClick() {
-	log.Println("ToolbarTimezoneButtonOnClick")
+func MainToolbarTimezoneButtonOnClick() {
+	log.Printf("MainToolbarTimezoneButtonOnClick")
 	if locationText.Text == "UTC" {
 		appEngine.Timer.Object.SetLocationName(timer.LocalLocationName)
 	} else {
@@ -65,11 +65,11 @@ func ToolbarTimezoneButtonOnClick() {
 }
 
 func MainWindowLoop() {
-	log.Println("MainWindowLoop : Start")
+	log.Printf("MainWindowLoop : Start")
 	go func() {
 		for {
 			/* default width: 320 */
-			cw := mainWindow.Content().Size().Width
+			cw := appEngine.Fyne.MainWindow.Content().Size().Width
 			//goland:noinspection GoRedundantConversion
 			r := float32(cw) / float32(320)
 
@@ -102,9 +102,8 @@ func MainWindowLoop() {
 	}()
 }
 
-func MainWindowInit() {
-
-	log.Println("MainWindowInit")
+func MainWindowContent() *fyne.Container {
+	log.Printf("MainWindowContent")
 
 	if !mainWindowInitialized {
 
@@ -113,20 +112,16 @@ func MainWindowInit() {
 		remainingColor = color.NRGBA{R: 150, G: 100, B: 100, A: 255}
 		locationColor = color.NRGBA{R: 100, G: 100, B: 100, A: 255}
 
-		/* Main Window creation  */
-		mainWindow = appEngine.Fyne.App.NewWindow(appEngine.Title())
-		mainWindow.Resize(fyne.NewSize(320, 540))
-
 		/* Top toolbar */
-		toolbarMenuButton = widget.NewToolbarAction(theme.SettingsIcon(), ToolbarMenuButtonOnClick)
-		toolbarTimezoneButton = widget.NewToolbarAction(theme.HomeIcon(), ToolbarTimezoneButtonOnClick)
-		toolbarHelpButton = widget.NewToolbarAction(theme.HelpIcon(), ToolbarHelpButtonOnClick)
-		toolbarMenu = widget.NewToolbar(
-			toolbarMenuButton,
+		mainToolbarMenuButton = widget.NewToolbarAction(theme.MenuIcon(), MainToolbarMenuButtonOnClick)
+		mainToolbarTimezoneButton = widget.NewToolbarAction(theme.HomeIcon(), MainToolbarTimezoneButtonOnClick)
+		mainToolbarHelpButton = widget.NewToolbarAction(theme.HelpIcon(), MainToolbarHelpButtonOnClick)
+		mainToolbarMenu = widget.NewToolbar(
+			mainToolbarMenuButton,
 			widget.NewToolbarSeparator(),
-			toolbarTimezoneButton,
+			mainToolbarTimezoneButton,
 			widget.NewToolbarSpacer(),
-			toolbarHelpButton,
+			mainToolbarHelpButton,
 		)
 
 		/* Current Time */
@@ -138,7 +133,7 @@ func MainWindowInit() {
 		currentText.Alignment = fyne.TextAlignCenter
 		currentText.TextSize = 36
 		currentText.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
-		currentGrid := container.New(layout.NewGridLayout(1), currentLabel, currentText)
+		currentGrid := container.NewGridWithColumns(1, currentLabel, currentText)
 
 		/* Target Time */
 		targetLabel = canvas.NewText("Target", targetColor)
@@ -149,7 +144,7 @@ func MainWindowInit() {
 		targetText.Alignment = fyne.TextAlignCenter
 		targetText.TextSize = 36
 		targetText.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
-		targetGrid := container.New(layout.NewGridLayout(1), targetLabel, targetText)
+		targetGrid := container.NewGridWithColumns(1, targetLabel, targetText)
 
 		/* Remaining Time */
 		remainingLabel = canvas.NewText("Remaining", remainingColor)
@@ -160,35 +155,37 @@ func MainWindowInit() {
 		remainingText.Alignment = fyne.TextAlignCenter
 		remainingText.TextSize = 36
 		remainingText.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
-		remainingGrid := container.New(layout.NewGridLayout(1), remainingLabel, remainingText)
+		remainingGrid := container.NewGridWithColumns(1, remainingLabel, remainingText)
 
 		/* Current Location (UTC/Local) */
 		locationText = canvas.NewText(appEngine.Timer.Object.GetLocationName(), locationColor)
 		locationText.Alignment = fyne.TextAlignCenter
 		locationText.TextSize = 16
 		locationText.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
-		locationGrid := container.New(layout.NewGridLayout(1), locationText)
+		locationGrid := container.NewGridWithColumns(1, locationText)
 
 		/* Middle content */
-		middleGrid := container.New(layout.NewGridLayout(1), currentGrid, targetGrid, remainingGrid, locationGrid)
-		middleContainer := container.New(layout.NewCenterLayout(), middleGrid)
+		middleGrid := container.NewGridWithColumns(1, currentGrid, targetGrid, remainingGrid, locationGrid)
+		middleContainer := container.NewCenter(middleGrid)
 
 		/* Bottom buttons */
 		setTargetTimeButton := widget.NewButton("Set Target", TargetTimeDialogShow)
 		setTargetTimeButton.SetIcon(theme.MediaPlayIcon())
-		bottomContainer := container.New(layout.NewCenterLayout(), setTargetTimeButton)
-
-		mainWindow.SetContent(container.NewBorder(toolbarMenu, bottomContainer, nil, nil, middleContainer))
+		bottomContainer := container.NewCenter(setTargetTimeButton)
 
 		RefreshDisplayedTimezone()
 
 		MainWindowLoop()
 
+		mainWindowContainer = container.NewBorder(mainToolbarMenu, bottomContainer, nil, nil, middleContainer)
+
 		mainWindowInitialized = true
 	}
+	return mainWindowContainer
 }
 
-func MainWindowShow() {
-	MainWindowInit()
-	mainWindow.Show()
+func ShowMainWindow() {
+	log.Printf("ShowMainWindow")
+	appEngine.Fyne.MainWindow.SetContent(MainWindowContent())
+	appEngine.Fyne.MainWindow.Show()
 }

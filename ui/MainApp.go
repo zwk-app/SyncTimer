@@ -15,7 +15,7 @@ var appEngine *tools.AppEngine
 func TextToSpeechAlert(name string) {
 	if appEngine.Alerts.TextToSpeech {
 		log.Printf("TextToSpeechAlert '%s'", name)
-		go appEngine.TextToSpeech.Object.Play(name)
+		go appEngine.Audio.Object.Play(name)
 	}
 }
 
@@ -46,9 +46,11 @@ func AlertLoop() {
 			}
 			if currentCheck < lastCheck {
 				h, m, s := appEngine.Timer.Object.GetRemainingTime()
-				if currentCheck > 0 {
+				if currentCheck >= 0 {
 					if currentCheck < 11 {
-						if currentCheck%2 == 0 {
+						if currentCheck == 0 {
+							TextToSpeechAlert(appEngine.Alerts.AlertSound)
+						} else if currentCheck%2 == 0 {
 							// every 2 sec if T <= 10s
 							TextToSpeechAlert(fmt.Sprintf("target-%02d-seconds", s))
 						}
@@ -109,6 +111,8 @@ func MainApp(a *tools.AppEngine) {
 	}
 	AlertLoop()
 
-	MainWindowShow()
+	appEngine.Fyne.MainWindow = appEngine.Fyne.App.NewWindow(appEngine.Title())
+	appEngine.Fyne.MainWindow.Resize(fyne.NewSize(320, 540))
+	ShowMainWindow()
 	appEngine.Fyne.App.Run()
 }

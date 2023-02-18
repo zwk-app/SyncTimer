@@ -1,9 +1,9 @@
 package main
 
 import (
+	"SyncTimer/audio"
 	"SyncTimer/timer"
 	"SyncTimer/tools"
-	"SyncTimer/tts"
 	"SyncTimer/ui"
 	"embed"
 	"os/exec"
@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-//go:embed audio/*.mp3
+//go:embed res/audio/*.mp3
 var EmbeddedFS embed.FS
 
 // FixTimezone https://github.com/golang/go/issues/20455
@@ -31,12 +31,12 @@ func FixTimezone() {
 func main() {
 	appEngine := tools.NewAppEngine(ApplicationName, MajorVersion, MinorVersion, BuildNumber, &EmbeddedFS)
 	appEngine.LoadEnvSettings().LoadFileSettings("").LoadArgSettings().SetLogOptions()
-	appEngine.TextToSpeech.Object = tts.NewTextToSpeech(appEngine.Name(), appEngine.TextToSpeech.LocalPath, "en")
-	appEngine.TextToSpeech.Object.SetEmbeddedAudioFS(&EmbeddedFS, appEngine.TextToSpeech.EmbeddedPath)
+	appEngine.Audio.Object = audio.NewTextToSpeech(appEngine.Name(), appEngine.Audio.LocalPath, "en")
+	appEngine.Audio.Object.SetEmbeddedAudioFS(&EmbeddedFS, appEngine.Audio.EmbeddedPath)
 	appEngine.Timer.Object = timer.NewTargetTimer()
 
-	if appEngine.TextToSpeech.GenerateTTS {
-		tts.GenerateAllAudioFiles(appEngine.Name(), appEngine.TextToSpeech.LocalPath)
+	if appEngine.Audio.GenerateTTS {
+		audio.GenerateAllAudioFiles(appEngine.Name(), appEngine.Audio.LocalPath)
 	} else {
 		FixTimezone()
 		if appEngine.Timer.TargetTime != "" {

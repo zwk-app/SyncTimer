@@ -79,7 +79,7 @@ func TargetTimeDialogInit() {
 		targetInput.OnChanged = TargetInputOnChange
 		targetTimeDialogFormItems = append(targetTimeDialogFormItems, widget.NewFormItem("hh[mm[ss]]", targetInput))
 		targetTimeDialog = dialog.NewForm("Target time", "OK", "Cancel",
-			targetTimeDialogFormItems, TargetTimeDialogOnExit, mainWindow)
+			targetTimeDialogFormItems, TargetTimeDialogOnExit, appEngine.Fyne.MainWindow)
 		targetTimeDialogInitialized = true
 	}
 }
