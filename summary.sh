@@ -3,12 +3,12 @@
 MD_OUT=SyncTimer.summary.md
 
 function MdHeader {
-  echo -ne "## Release Notes\n\n" > "${MD_OUT}"
+  echo -ne "## What's Changed\n\n" > "${MD_OUT}"
   # shellcheck disable=SC2129
-  echo -ne "### 🛠 Breaking Changes\n\n- LoremIpsum\n" >> "${MD_OUT}"
-  echo -ne "### 🎯 Features\n\n- LoremIpsum\n" >> "${MD_OUT}"
-  echo -ne "### 🩹 Fix:\n\n- LoremIpsum\n" >> "${MD_OUT}"
-  echo -ne "### 🧹 Other:\n\n- LoremIpsum\n" >> "${MD_OUT}"
+  echo -ne "### 🛠 Breaking Changes\n\n- LoremIpsum\n\n\n" >> "${MD_OUT}"
+  echo -ne "### 🎯 Features\n\n- LoremIpsum\n\n\n" >> "${MD_OUT}"
+  echo -ne "### 🩹 Fix:\n\n- LoremIpsum\n\n\n" >> "${MD_OUT}"
+  echo -ne "### 🧹 Other:\n\n- LoremIpsum\n\n\n" >> "${MD_OUT}"
 }
 
 function MdSumHead {
