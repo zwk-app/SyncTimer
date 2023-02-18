@@ -42,12 +42,12 @@ func ToolbarHelpButtonOnClick() {
 }
 
 func RefreshDisplayedTimezone() {
-	if Timer.GetLocationName() == timer.LocalLocationName {
+	if appEngine.Timer.Object.GetLocationName() == timer.LocalLocationName {
 		toolbarTimezoneButton.SetIcon(theme.HomeIcon())
 	} else {
 		toolbarTimezoneButton.SetIcon(theme.MediaRecordIcon())
 	}
-	locationText.Text = Timer.GetLocationName()
+	locationText.Text = appEngine.Timer.Object.GetLocationName()
 	locationText.Refresh()
 	toolbarMenu.Refresh()
 }
@@ -55,11 +55,12 @@ func RefreshDisplayedTimezone() {
 func ToolbarTimezoneButtonOnClick() {
 	log.Println("ToolbarTimezoneButtonOnClick")
 	if locationText.Text == "UTC" {
-		Timer.SetLocationName(timer.LocalLocationName)
+		appEngine.Timer.Object.SetLocationName(timer.LocalLocationName)
 	} else {
-		Timer.SetLocationName("UTC")
+		appEngine.Timer.Object.SetLocationName("UTC")
 	}
-	mainApp.Preferences().SetString("currentLocationName", Timer.GetLocationName())
+	appEngine.Timer.LocationName = appEngine.Timer.Object.GetLocationName()
+	_ = appEngine.SaveFyneSettings()
 	RefreshDisplayedTimezone()
 }
 
@@ -84,12 +85,12 @@ func MainWindowLoop() {
 			currentText.TextSize = 36 * r
 			remainingText.TextSize = 36 * r
 
-			targetText.Text = Timer.GetTargetTimeString()
-			currentText.Text = Timer.GetCurrentTimeString()
-			remainingText.Text = Timer.GetRemainingString()
+			targetText.Text = appEngine.Timer.Object.GetTargetTimeString()
+			currentText.Text = appEngine.Timer.Object.GetCurrentTimeString()
+			remainingText.Text = appEngine.Timer.Object.GetRemainingString()
 
-			if Timer.GetRemainingSeconds() < -30 {
-				Timer.Next()
+			if appEngine.Timer.Object.GetRemainingSeconds() < -30 {
+				appEngine.Timer.Object.Next()
 			}
 
 			targetText.Refresh()
@@ -113,7 +114,7 @@ func MainWindowInit() {
 		locationColor = color.NRGBA{R: 100, G: 100, B: 100, A: 255}
 
 		/* Main Window creation  */
-		mainWindow = mainApp.NewWindow(AppName + " v" + AppVersion)
+		mainWindow = appEngine.Fyne.App.NewWindow(appEngine.Title())
 		mainWindow.Resize(fyne.NewSize(320, 540))
 
 		/* Top toolbar */
@@ -133,7 +134,7 @@ func MainWindowInit() {
 		currentLabel.Alignment = fyne.TextAlignCenter
 		currentLabel.TextSize = 16
 		currentLabel.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
-		currentText = canvas.NewText(Timer.GetCurrentTimeString(), currentColor)
+		currentText = canvas.NewText(appEngine.Timer.Object.GetCurrentTimeString(), currentColor)
 		currentText.Alignment = fyne.TextAlignCenter
 		currentText.TextSize = 36
 		currentText.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
@@ -144,7 +145,7 @@ func MainWindowInit() {
 		targetLabel.Alignment = fyne.TextAlignCenter
 		targetLabel.TextSize = 16
 		targetLabel.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
-		targetText = canvas.NewText(Timer.GetTargetTimeString(), targetColor)
+		targetText = canvas.NewText(appEngine.Timer.Object.GetTargetTimeString(), targetColor)
 		targetText.Alignment = fyne.TextAlignCenter
 		targetText.TextSize = 36
 		targetText.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
@@ -155,14 +156,14 @@ func MainWindowInit() {
 		remainingLabel.Alignment = fyne.TextAlignCenter
 		remainingLabel.TextSize = 16
 		remainingLabel.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
-		remainingText = canvas.NewText(Timer.GetRemainingString(), remainingColor)
+		remainingText = canvas.NewText(appEngine.Timer.Object.GetRemainingString(), remainingColor)
 		remainingText.Alignment = fyne.TextAlignCenter
 		remainingText.TextSize = 36
 		remainingText.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
 		remainingGrid := container.New(layout.NewGridLayout(1), remainingLabel, remainingText)
 
 		/* Current Location (UTC/Local) */
-		locationText = canvas.NewText(Timer.GetLocationName(), locationColor)
+		locationText = canvas.NewText(appEngine.Timer.Object.GetLocationName(), locationColor)
 		locationText.Alignment = fyne.TextAlignCenter
 		locationText.TextSize = 16
 		locationText.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
@@ -188,7 +189,6 @@ func MainWindowInit() {
 }
 
 func MainWindowShow() {
-
 	MainWindowInit()
 	mainWindow.Show()
 }

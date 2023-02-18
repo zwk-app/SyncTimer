@@ -25,18 +25,17 @@ func OptionsDialogInit() {
 func OptionsDialogOnExit(b bool) {
 	log.Println("OptionsDialogOnExit")
 	if b {
-		voiceAlertsEnabled = voiceAlertsCheck.Checked
-		notificationsEnabled = notificationsCheck.Checked
-		mainApp.Preferences().SetBool("voiceAlertsEnabled", voiceAlertsEnabled)
-		mainApp.Preferences().SetBool("notificationsEnabled", notificationsEnabled)
+		appEngine.Alerts.TextToSpeech = voiceAlertsCheck.Checked
+		appEngine.Alerts.Notifications = notificationsCheck.Checked
+		_ = appEngine.SaveFyneSettings()
 	}
 }
 
 func OptionsDialogShow() {
 	log.Println("OptionsDialogShow")
 	OptionsDialogInit()
-	voiceAlertsCheck.SetChecked(mainApp.Preferences().BoolWithFallback("voiceAlertsEnabled", voiceAlertsEnabled))
-	notificationsCheck.SetChecked(mainApp.Preferences().BoolWithFallback("notificationsEnabled", notificationsEnabled))
+	voiceAlertsCheck.SetChecked(appEngine.Alerts.TextToSpeech)
+	notificationsCheck.SetChecked(appEngine.Alerts.Notifications)
 	dialog.ShowForm("Options", "OK", "Cancel",
 		optionsDialogForm, OptionsDialogOnExit, mainWindow)
 }

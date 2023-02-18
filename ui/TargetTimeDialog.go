@@ -65,7 +65,7 @@ func TargetInputOnChange(s string) {
 func TargetTimeDialogOnExit(b bool) {
 	log.Println("TargetTimeDialogOnExit")
 	if b {
-		valid := Timer.SetTargetString(targetInput.Text)
+		valid := appEngine.Timer.Object.SetTargetString(targetInput.Text)
 		if !valid {
 			log.Printf("TargetTimeDialogOnExit invalid: %s", targetInput.Text)
 		}
