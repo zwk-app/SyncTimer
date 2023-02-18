@@ -37,8 +37,8 @@ function AppVersion {
 function SetReleaseEnv {
   APP_NAME="$(AppName)"
   APP_VERS="$(AppVersion)"
-  echo "RELEASE_NAME=\"${APP_NAME} v${APP_VERS}\"" >> "${GITHUB_ENV}"
-  echo "RELEASE_TAG=\"v${APP_VERS}\"" >> "${GITHUB_ENV}"
+  echo "RELEASE_NAME=${APP_NAME} v${APP_VERS}" >> "${GITHUB_ENV}"
+  echo "RELEASE_TAG=v${APP_VERS}" >> "${GITHUB_ENV}"
 }
 
 function SetNextBuildNumber() {
