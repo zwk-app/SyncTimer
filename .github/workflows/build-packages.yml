@@ -1,8 +1,6 @@
 #file: noinspection SpellCheckingInspection,SpellCheckingInspection,SpellCheckingInspection,SpellCheckingInspection,SpellCheckingInspection,SpellCheckingInspection,SpellCheckingInspection,SpellCheckingInspection,SpellCheckingInspection,SpellCheckingInspection,SpellCheckingInspection,SpellCheckingInspection,SpellCheckingInspection
 name: Build & Release
 
-description: "Build binaries and creates a new release"
-
 on:
   workflow_dispatch:
     inputs:
