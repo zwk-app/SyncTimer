@@ -2,4 +2,4 @@ package main
 
 const MajorVersion = 0
 const MinorVersion = 9
-const BuildNumber = 16
+const BuildNumber = 17
