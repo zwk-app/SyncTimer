@@ -1,6 +1,6 @@
 package main
 
 const ApplicationName = "SyncTimer"
-const MajorVersion = 0
-const MinorVersion = 9
-const BuildNumber = 18
+const MajorVersion = 1
+const MinorVersion = 0
+const BuildNumber = 0
