@@ -17,14 +17,14 @@ var settingsVoiceAlertsCheck *widget.Check
 var settingsNotificationsCheck *widget.Check
 var settingsAlertSoundSelect *widget.Select
 
-func SettingsOnClose() {
-	log.Printf("SettingsOnClose")
+func SettingsWindowOnClose() {
+	log.Printf("SettingsWindowOnClose")
 	ShowMainWindow()
 }
 
 func SettingsToolbarMenuButtonOnClick() {
 	log.Printf("SettingsToolbarMenuButtonOnClick")
-	SettingsOnClose()
+	SettingsWindowOnClose()
 }
 
 func SettingsToolbarHelpButtonOnClick() {
@@ -44,7 +44,7 @@ func SettingsSaveButtonOnClick() {
 	appEngine.Alerts.Notifications = settingsNotificationsCheck.Checked
 	appEngine.Alerts.AlertSound = appEngine.AlertName(settingsAlertSoundSelect.Selected)
 	_ = appEngine.SaveFyneSettings()
-	SettingsOnClose()
+	SettingsWindowOnClose()
 }
 
 func SettingsWindowContent() *fyne.Container {

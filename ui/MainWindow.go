@@ -169,7 +169,7 @@ func MainWindowContent() *fyne.Container {
 		middleContainer := container.NewCenter(middleGrid)
 
 		/* Bottom buttons */
-		setTargetTimeButton := widget.NewButton("Set Target", TargetTimeDialogShow)
+		setTargetTimeButton := widget.NewButton("Set Target", ShowTargetWindow)
 		setTargetTimeButton.SetIcon(theme.MediaPlayIcon())
 		bottomContainer := container.NewCenter(setTargetTimeButton)
 
