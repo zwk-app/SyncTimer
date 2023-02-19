@@ -181,7 +181,7 @@ func (c *AppEngine) Name() string {
 }
 
 func (c *AppEngine) Version() string {
-	return fmt.Sprintf("%d.%d.%02d", c.version.major, c.version.minor, c.version.build)
+	return fmt.Sprintf("%d.%d.%d", c.version.major, c.version.minor, c.version.build)
 }
 
 func (c *AppEngine) Title() string {
