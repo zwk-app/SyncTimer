@@ -1,0 +1,12 @@
+{
+  "targets": [
+    { "targetTime": "U17",   "targetLabel": "Go Go Go!",   "alertSound": "navy-22-wanking-of-combat" },
+    { "targetTime": "7" },
+    { "targetTime": "715",   "targetLabel": "Wake Up!" },
+    { "targetTime": "0730",  "alertSound": "navy-14-wake-up" },
+    { "targetTime": "74500", "targetLabel": "Breakfast",   "alertSound": "navy-02-breakfast" },
+    { "targetTime": "08",    "targetLabel": "Go Go Go!",   "alertSound": "navy-01-wanking-of-combat" },
+    { "targetTime": "L1200", "targetLabel": "Lunch Time",  "alertSound": "navy-12-lunch-time" },
+    { "targetTime": "L2000", "targetLabel": "Supper Time", "alertSound": "navy-12-lunch-time" }
+  ]
+}

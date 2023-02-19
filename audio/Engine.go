@@ -21,15 +21,18 @@ func NewAudioEngine(embeddedFS *embed.FS, embeddedAudioPath string, localAudioPa
 	t := AudioEngine{}
 	t.player = NewAudioPlayer(embeddedFS, embeddedAudioPath)
 	t.textToSpeech = NewTextToSpeech(language)
+	if !strings.HasSuffix(localAudioPath, string(os.PathSeparator)) {
+		localAudioPath += string(os.PathSeparator)
+	}
 	t.localAudioPath = localAudioPath
 	return &t
 }
 
 func (t *AudioEngine) GetFileName(shortName string) string {
 	if strings.HasPrefix(shortName, "target") || strings.HasPrefix(shortName, "about") {
-		return path.Clean(t.localAudioPath + string(os.PathSeparator) + shortName + "." + t.textToSpeech.language + ".mp3")
+		return path.Clean(t.localAudioPath + shortName + "." + t.textToSpeech.language + ".mp3")
 	}
-	return path.Clean(t.localAudioPath + string(os.PathSeparator) + shortName + ".mp3")
+	return path.Clean(t.localAudioPath + shortName + ".mp3")
 }
 
 func (t *AudioEngine) Create(shortName string, message string) error {

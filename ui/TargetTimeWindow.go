@@ -71,10 +71,7 @@ func TargetWindowOnClose() {
 
 func TargetConfirmButtonOnClick() {
 	log.Printf("TargetConfirmButtonOnClick")
-	valid := appEngine.Timer.Object.SetTargetString(targetInput.Text)
-	if !valid {
-		log.Printf("TargetConfirmButtonOnClick invalid: '%s'", targetInput.Text)
-	}
+	appEngine.SetTargetTime(targetInput.Text)
 	TargetWindowOnClose()
 }
 

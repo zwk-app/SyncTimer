@@ -35,7 +35,7 @@ func SettingsToolbarHelpButtonOnClick() {
 func SettingsAlertSoundSelectOnChange(alertTitle string) {
 	log.Printf("SettingsAlertSoundSelectOnChange: %s", alertTitle)
 	//goland:noinspection GoUnhandledErrorResult
-	go appEngine.Audio.Object.Play(appEngine.AlertName(alertTitle))
+	go appEngine.Audio.Engine.Play(appEngine.AlertName(alertTitle))
 }
 
 func SettingsSaveButtonOnClick() {

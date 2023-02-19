@@ -7,7 +7,6 @@ import (
 	"github.com/hajimehoshi/oto/v2"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 	"time"
 )
@@ -48,22 +47,16 @@ func (p *AudioPlayer) playMp3Content(fileBytes []byte) error {
 }
 
 func (p *AudioPlayer) Play(fileName string) error {
-	embeddedFileName := path.Clean(p.embeddedPath + string(os.PathSeparator) + filepath.Base(fileName))
-	_, e := os.Stat(embeddedFileName)
+	embeddedFileName := p.embeddedPath + filepath.Base(fileName)
+	embeddedFileBytes, e := p.embeddedFS.ReadFile(embeddedFileName)
 	if e == nil {
-		embeddedFileBytes, e := p.embeddedFS.ReadFile(embeddedFileName)
-		if e == nil {
-			log.Printf("AudioPlayer->Play embedded:%s", embeddedFileName)
-			return p.playMp3Content(embeddedFileBytes)
-		}
+		log.Printf("AudioPlayer->Play embedded:%s", embeddedFileName)
+		return p.playMp3Content(embeddedFileBytes)
 	}
-	_, e = os.Stat(fileName)
+	localFileBytes, e := os.ReadFile(fileName)
 	if e == nil {
-		localFileBytes, e := os.ReadFile(fileName)
-		if e == nil {
-			log.Printf("AudioPlayer->Play local:%s", fileName)
-			return p.playMp3Content(localFileBytes)
-		}
+		log.Printf("AudioPlayer->Play local:%s", fileName)
+		return p.playMp3Content(localFileBytes)
 	}
 	return e
 }

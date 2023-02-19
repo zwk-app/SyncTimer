@@ -16,14 +16,14 @@ func TextToSpeechAlert(name string) {
 	if appEngine.Alerts.TextToSpeech {
 		log.Printf("TextToSpeechAlert '%s'", name)
 		//goland:noinspection GoUnhandledErrorResult
-		go appEngine.Audio.Object.Play(name)
+		go appEngine.Audio.Engine.Play(name)
 	}
 }
 
 func NotificationAlert(message string) {
 	if appEngine.Alerts.Notifications {
 		log.Printf("NotificationAlert '%s'", message)
-		go appEngine.Fyne.App.SendNotification(fyne.NewNotification(appEngine.Title(), message))
+		go appEngine.Fyne.App.SendNotification(fyne.NewNotification(appEngine.AppTitle(), message))
 	}
 }
 
@@ -35,7 +35,7 @@ func AlertLoop() {
 		lastCheck := 0
 		lastCheckDiff := 0
 		for {
-			currentCheck = appEngine.Timer.Object.GetRemainingSeconds()
+			currentCheck = appEngine.Timer.Engine.RemainingSeconds()
 			lastCheckDiff = lastCheck - currentCheck
 			if lastCheck < currentCheck {
 				log.Printf("AlertLoop : %08d << %08d (%02d)", lastCheck, currentCheck, lastCheckDiff)
@@ -46,7 +46,7 @@ func AlertLoop() {
 				currentCheck = lastCheck - 1
 			}
 			if currentCheck < lastCheck {
-				h, m, s := appEngine.Timer.Object.GetRemainingTime()
+				h, m, s := appEngine.Timer.Engine.RemainingTime()
 				if currentCheck >= 0 {
 					if currentCheck < 11 {
 						if currentCheck == 0 {
@@ -104,15 +104,10 @@ func MainApp(a *tools.AppEngine) {
 	if e != nil {
 		log.Println("Setenv error?")
 	}
-	appEngine.Fyne.App = app.NewWithID(appEngine.Name())
+	appEngine.Fyne.App = app.NewWithID(appEngine.AppName())
 	_ = appEngine.LoadFyneSettings()
-
-	if !appEngine.Timer.EnforceTarget {
-		appEngine.Timer.Object.Next()
-	}
 	AlertLoop()
-
-	appEngine.Fyne.MainWindow = appEngine.Fyne.App.NewWindow(appEngine.Title())
+	appEngine.Fyne.MainWindow = appEngine.Fyne.App.NewWindow(appEngine.AppTitle())
 	appEngine.Fyne.MainWindow.Resize(fyne.NewSize(320, 540))
 	ShowMainWindow()
 	appEngine.Fyne.App.Run()

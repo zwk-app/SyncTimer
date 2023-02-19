@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="genTTS" type="GoApplicationRunConfiguration" factoryName="Go Application" show_console_on_std_err="true" show_console_on_std_out="true">
     <module name="SyncTimer" />
-    <working_directory value="$PROJECT_DIR$" />
+    <working_directory value="$PROJECT_DIR$/build" />
     <parameters value="--generate-tts --audioPath=$ProjectFileDir$\res\audio" />
     <kind value="PACKAGE" />
     <package value="SyncTimer" />

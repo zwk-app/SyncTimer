@@ -42,12 +42,12 @@ func MainToolbarHelpButtonOnClick() {
 }
 
 func RefreshDisplayedTimezone() {
-	if appEngine.Timer.Object.GetLocationName() == timer.LocalLocationName {
+	if appEngine.Timer.Engine.LocationName() == timer.LocalLocationName {
 		mainToolbarTimezoneButton.SetIcon(theme.HomeIcon())
 	} else {
 		mainToolbarTimezoneButton.SetIcon(theme.MediaRecordIcon())
 	}
-	locationText.Text = appEngine.Timer.Object.GetLocationName()
+	locationText.Text = appEngine.Timer.Engine.LocationName()
 	locationText.Refresh()
 	mainToolbarMenu.Refresh()
 }
@@ -55,11 +55,11 @@ func RefreshDisplayedTimezone() {
 func MainToolbarTimezoneButtonOnClick() {
 	log.Printf("MainToolbarTimezoneButtonOnClick")
 	if locationText.Text == "UTC" {
-		appEngine.Timer.Object.SetLocationName(timer.LocalLocationName)
+		appEngine.Timer.Engine.SetLocationName(timer.LocalLocationName)
 	} else {
-		appEngine.Timer.Object.SetLocationName("UTC")
+		appEngine.Timer.Engine.SetLocationName("UTC")
 	}
-	appEngine.Timer.LocationName = appEngine.Timer.Object.GetLocationName()
+	appEngine.Timer.LocationName = appEngine.Timer.Engine.LocationName()
 	_ = appEngine.SaveFyneSettings()
 	RefreshDisplayedTimezone()
 }
@@ -85,12 +85,12 @@ func MainWindowLoop() {
 			currentText.TextSize = 36 * r
 			remainingText.TextSize = 36 * r
 
-			targetText.Text = appEngine.Timer.Object.GetTargetTimeString()
-			currentText.Text = appEngine.Timer.Object.GetCurrentTimeString()
-			remainingText.Text = appEngine.Timer.Object.GetRemainingString()
+			targetText.Text = appEngine.Timer.Engine.TargetTextString()
+			currentText.Text = appEngine.Timer.Engine.CurrentTextString()
+			remainingText.Text = appEngine.Timer.Engine.RemainingString()
 
-			if appEngine.Timer.Object.GetRemainingSeconds() < -30 {
-				appEngine.Timer.Object.Next()
+			if appEngine.Timer.Engine.RemainingSeconds() < -30 {
+				appEngine.NextTarget()
 			}
 
 			targetText.Refresh()
@@ -129,18 +129,18 @@ func MainWindowContent() *fyne.Container {
 		currentLabel.Alignment = fyne.TextAlignCenter
 		currentLabel.TextSize = 16
 		currentLabel.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
-		currentText = canvas.NewText(appEngine.Timer.Object.GetCurrentTimeString(), currentColor)
+		currentText = canvas.NewText(appEngine.Timer.Engine.CurrentTextString(), currentColor)
 		currentText.Alignment = fyne.TextAlignCenter
 		currentText.TextSize = 36
 		currentText.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
 		currentGrid := container.NewGridWithColumns(1, currentLabel, currentText)
 
 		/* Target Time */
-		targetLabel = canvas.NewText("Target", targetColor)
+		targetLabel = canvas.NewText(appEngine.Timer.Engine.TextLabel(), targetColor)
 		targetLabel.Alignment = fyne.TextAlignCenter
 		targetLabel.TextSize = 16
 		targetLabel.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
-		targetText = canvas.NewText(appEngine.Timer.Object.GetTargetTimeString(), targetColor)
+		targetText = canvas.NewText(appEngine.Timer.Engine.TargetTextString(), targetColor)
 		targetText.Alignment = fyne.TextAlignCenter
 		targetText.TextSize = 36
 		targetText.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
@@ -151,14 +151,14 @@ func MainWindowContent() *fyne.Container {
 		remainingLabel.Alignment = fyne.TextAlignCenter
 		remainingLabel.TextSize = 16
 		remainingLabel.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
-		remainingText = canvas.NewText(appEngine.Timer.Object.GetRemainingString(), remainingColor)
+		remainingText = canvas.NewText(appEngine.Timer.Engine.RemainingString(), remainingColor)
 		remainingText.Alignment = fyne.TextAlignCenter
 		remainingText.TextSize = 36
 		remainingText.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
 		remainingGrid := container.NewGridWithColumns(1, remainingLabel, remainingText)
 
 		/* Current Location (UTC/Local) */
-		locationText = canvas.NewText(appEngine.Timer.Object.GetLocationName(), locationColor)
+		locationText = canvas.NewText(appEngine.Timer.Engine.LocationName(), locationColor)
 		locationText.Alignment = fyne.TextAlignCenter
 		locationText.TextSize = 16
 		locationText.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}

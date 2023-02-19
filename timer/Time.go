@@ -5,6 +5,7 @@ import (
 	"log"
 	"strconv"
 	"time"
+	"unicode"
 )
 
 type Time struct {
@@ -14,6 +15,9 @@ type Time struct {
 	hours        int
 	minutes      int
 	seconds      int
+	last         struct {
+		error error
+	}
 }
 
 const LocalLocationName = "Local Time"
@@ -29,24 +33,32 @@ func NewTime() *Time {
 	}
 }
 
-func (t *Time) GetLocation() *time.Location {
+func (t *Time) Error() error {
+	lastError := t.last.error
+	t.last.error = nil
+	return lastError
+}
+func (t *Time) Location() *time.Location {
 	return t.location
 }
 
-func (t *Time) GetLocationName() string {
+func (t *Time) LocationName() string {
 	return t.locationName
 }
 
-func (t *Time) GetTime() time.Time {
+func (t *Time) Time() time.Time {
 	return t.time
 }
 
-func (t *Time) GetTimeString() string {
-	return fmt.Sprintf("%d:%02d:%02d", t.hours, t.minutes, t.seconds)
+func (t *Time) TimeString() string {
+	return StringFromTime(t.hours, t.minutes, t.seconds)
 }
 
-func (t *Time) SetLocation(location *time.Location) bool {
-	log.Printf("Time->SetLocation '%s'", location)
+func (t *Time) TextString() string {
+	return fmt.Sprintf("%02d:%02d:%02d", t.hours, t.minutes, t.seconds)
+}
+
+func (t *Time) SetLocation(location *time.Location) *Time {
 	if t.location != location {
 		switch location {
 		case time.UTC:
@@ -60,13 +72,11 @@ func (t *Time) SetLocation(location *time.Location) bool {
 			t.locationName = LocalLocationName
 		}
 		t.Set(t.time.In(location))
-		return true
 	}
-	return false
+	return t
 }
 
-func (t *Time) SetLocationName(location string) bool {
-	log.Printf("Time->SetLocationName '%s'", location)
+func (t *Time) SetLocationName(location string) *Time {
 	if t.locationName != location {
 		switch location {
 		case "UTC":
@@ -76,9 +86,71 @@ func (t *Time) SetLocationName(location string) bool {
 		default:
 			t.SetLocation(time.Local)
 		}
-		return true
 	}
-	return false
+	return t
+}
+
+func (t *Time) Set(new time.Time) *Time {
+	t.time = new.In(t.location)
+	t.hours = t.time.Hour()
+	t.minutes = t.time.Minute()
+	t.seconds = t.time.Second()
+	return t
+}
+
+func (t *Time) SetTime(h int, m int, s int) *Time {
+	if !CheckTime(h, m, s) {
+		t.last.error = fmt.Errorf("invalid time '%02d:%02d:%02d'", h, m, s)
+	} else {
+		currentTime := time.Now().In(t.location)
+		tmpTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), h, m, s, 0, t.location)
+		if tmpTime.Before(currentTime) {
+			tmpTime = time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day()+1, h, m, s, 0, t.location)
+		}
+		t.Set(tmpTime)
+	}
+	return t
+}
+
+func (t *Time) SetTimeString(timeString string) *Time {
+	currentLocation := t.location
+	if len(timeString) > 0 {
+		if unicode.IsLetter(rune(timeString[0])) {
+			switch timeString[0] {
+			case 'U':
+				if currentLocation != time.UTC {
+					t.SetLocation(time.UTC)
+				}
+			case 'L':
+				if currentLocation != time.Local {
+					t.SetLocation(time.Local)
+				}
+			default:
+				t.last.error = fmt.Errorf("invalid time string '%s'", timeString)
+				log.Printf("Time->SetTimeString error: %s", t.last.error.Error())
+				return t
+			}
+			timeString = timeString[1:]
+		}
+		h, m, s, e := TimeFromString(timeString)
+		if e != nil {
+			t.last.error = e
+			log.Printf("Time->SetTimeString error: %s", t.last.error.Error())
+			return t
+		}
+		t.SetTime(h, m, s)
+		if t.last.error != nil {
+			log.Printf("Time->SetTimeString error: %s", t.last.error.Error())
+			return t
+		}
+		if currentLocation != t.location {
+			_ = t.SetLocation(currentLocation)
+		}
+		return t
+	}
+	t.last.error = fmt.Errorf("invalid time string '%s'", timeString)
+	log.Printf("Time->SetTimeString error: %s", t.last.error.Error())
+	return t
 }
 
 func CheckTime(h int, m int, s int) bool {
@@ -88,30 +160,20 @@ func CheckTime(h int, m int, s int) bool {
 	return false
 }
 
-func (t *Time) Set(new time.Time) {
-	t.time = new.In(t.location)
-	t.hours = t.time.Hour()
-	t.minutes = t.time.Minute()
-	t.seconds = t.time.Second()
-}
-
-func (t *Time) SetTime(h int, m int, s int) bool {
-	log.Printf("Time->SetTime '%d:%02d:%02d'", h, m, s)
-	if CheckTime(h, m, s) {
-		currentTime := time.Now().In(t.location)
-		tmpTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), h, m, s, 0, t.location)
-		if tmpTime.Before(currentTime) {
-			tmpTime = time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day()+1, h, m, s, 0, t.location)
-		}
-		t.Set(tmpTime)
-		return true
+func CheckTimeString(timeString string) bool {
+	h, m, s, e := TimeFromString(timeString)
+	if e != nil {
+		return false
 	}
-	return false
+	return CheckTime(h, m, s)
 }
 
-func (t *Time) SetTimeString(target string) bool {
-	log.Printf("Time->SetTimeString '%s'", target)
-	targetLen := len(target)
+func StringFromTime(h int, m int, s int) string {
+	return fmt.Sprintf("%02d%02d%02d", h, m, s)
+}
+
+func TimeFromString(timeString string) (int, int, int, error) {
+	targetLen := len(timeString)
 	hasError := false
 	var he, me, se error
 	h := 0
@@ -119,30 +181,41 @@ func (t *Time) SetTimeString(target string) bool {
 	s := 0
 	switch targetLen {
 	case 1, 2:
-		h, he = strconv.Atoi(target)
+		h, he = strconv.Atoi(timeString)
 		if he != nil {
 			hasError = true
 		}
-	case 4:
-		h, he = strconv.Atoi(target[0:2])
-		m, me = strconv.Atoi(target[2:4])
+	case 3:
+		h, he = strconv.Atoi(timeString[0:1])
+		m, me = strconv.Atoi(timeString[1:3])
 		if he != nil || me != nil {
 			hasError = true
 		}
+	case 4:
+		h, he = strconv.Atoi(timeString[0:2])
+		m, me = strconv.Atoi(timeString[2:4])
+		if he != nil || me != nil {
+			hasError = true
+		}
+	case 5:
+		h, he = strconv.Atoi(timeString[0:1])
+		m, me = strconv.Atoi(timeString[1:3])
+		s, se = strconv.Atoi(timeString[3:5])
+		if he != nil || me != nil || se != nil {
+			hasError = true
+		}
 	case 6:
-		h, he = strconv.Atoi(target[0:2])
-		m, me = strconv.Atoi(target[2:4])
-		s, se = strconv.Atoi(target[4:6])
+		h, he = strconv.Atoi(timeString[0:2])
+		m, me = strconv.Atoi(timeString[2:4])
+		s, se = strconv.Atoi(timeString[4:6])
 		if he != nil || me != nil || se != nil {
 			hasError = true
 		}
 	}
 	if !hasError {
-		return t.SetTime(h, m, s)
+		if CheckTime(h, m, s) {
+			return h, m, s, nil
+		}
 	}
-	return false
-}
-
-func CheckTimeString(target string) bool {
-	return NewTime().SetTimeString(target)
+	return 0, 0, 0, fmt.Errorf("invalid time string '%s'", timeString)
 }

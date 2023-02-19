@@ -14,13 +14,13 @@ import (
 )
 
 type AppEngine struct {
-	name    string
-	version struct {
+	appName    string
+	appVersion struct {
 		major int
 		minor int
 		build int
 	}
-	Path           string
+	appPath        string
 	ConfigFileName string
 	EmbeddedFS     *embed.FS
 	Logs           struct {
@@ -28,18 +28,20 @@ type AppEngine struct {
 		FileName string `json:"log"`
 	}
 	Audio struct {
-		Object       *audio.AudioEngine
+		Engine       *audio.AudioEngine
 		Embedded     bool
 		EmbeddedPath string
 		LocalPath    string `json:"audioPath"`
 		GenerateTTS  bool   `json:"generate-audio"`
 	}
 	Timer struct {
-		Object        *timer.TargetTimer
-		TargetTime    string `json:"time"`
-		TargetDelay   string `json:"delay"`
-		LocationName  string
-		EnforceTarget bool
+		Engine       *timer.TargetTime
+		List         *timer.TargetList
+		ListURL      string `json:"targets-url"`
+		ListFile     string `json:"targets-file"`
+		TargetTime   string `json:"target-time"`
+		TargetDelay  string `json:"target-delay"`
+		LocationName string
 	}
 	Alerts struct {
 		TextToSpeech     bool
@@ -56,31 +58,31 @@ type AppEngine struct {
 }
 
 func NewAppEngine(appName string, major int, minor int, build int, appEmbeddedFS *embed.FS) *AppEngine {
-	log.Printf("--- %s version %d.%d build %02d ---", appName, major, minor, build)
+	log.Printf("--- %s appVersion %d.%d build %02d ---", appName, major, minor, build)
 	c := AppEngine{}
-	c.name = appName
-	c.version.major = major
-	c.version.minor = minor
-	c.version.build = build
+	c.appName = appName
+	c.appVersion.major = major
+	c.appVersion.minor = minor
+	c.appVersion.build = build
 	ex, e := os.Executable()
 	if e != nil {
 		ErrorExit(e.Error())
 	}
-	c.Path = path.Dir(ex)
-	c.ConfigFileName = path.Clean(c.Path + string(os.PathSeparator) + c.name + ".json")
+	c.appPath = path.Dir(ex)
+	c.ConfigFileName = path.Clean(c.appPath + string(os.PathSeparator) + c.appName + ".json")
 	c.EmbeddedFS = appEmbeddedFS
 	c.Logs.StdOut = false
 	c.Logs.FileName = ""
-	c.Audio.Object = nil
+	c.Audio.Engine = nil
 	c.Audio.Embedded = true
 	c.Audio.EmbeddedPath = "res/audio/"
-	c.Audio.LocalPath = path.Clean(c.Path + string(os.PathSeparator) + "res" + string(os.PathSeparator) + "audio" + string(os.PathSeparator))
+	c.Audio.LocalPath = path.Clean(c.appPath + string(os.PathSeparator) + "res" + string(os.PathSeparator) + "audio" + string(os.PathSeparator))
 	c.Audio.GenerateTTS = false
-	c.Timer.Object = nil
+	c.Timer.Engine = nil
+	c.Timer.List = nil
 	c.Timer.TargetTime = ""
 	c.Timer.TargetDelay = ""
 	c.Timer.LocationName = timer.LocalLocationName
-	c.Timer.EnforceTarget = false
 	c.Alerts.Notifications = false
 	c.Alerts.TextToSpeech = true
 	c.Alerts.AlertSound = "navy-12-lunch-time"
@@ -91,6 +93,31 @@ func NewAppEngine(appName string, major int, minor int, build int, appEmbeddedFS
 	return &c
 }
 
+func (c *AppEngine) AppName() string {
+	return c.appName
+}
+
+func (c *AppEngine) AppVersion() string {
+	return fmt.Sprintf("%d.%d.%d", c.appVersion.major, c.appVersion.minor, c.appVersion.build)
+}
+
+func (c *AppEngine) AppTitle() string {
+	return fmt.Sprintf("%s v%s", c.AppName(), c.AppVersion())
+}
+
+func (c *AppEngine) AppPath() string {
+	return c.appPath
+}
+
+func (c *AppEngine) AlertName(alertTitle string) string {
+	for i, t := range c.Alerts.AlertSoundTitles {
+		if t == alertTitle {
+			return c.Alerts.AlertSoundNames[i]
+		}
+	}
+	return ""
+}
+
 func (c *AppEngine) LoadEnvSettings() *AppEngine {
 	log.Printf("AppEngine->LoadEnvSettings")
 	c.ProxyString = os.Getenv("HTTP_PROXY")
@@ -98,7 +125,6 @@ func (c *AppEngine) LoadEnvSettings() *AppEngine {
 }
 
 func (c *AppEngine) jsonLoad(jsonFileName string) error {
-	log.Printf("AppEngine->jsonLoad: '%s'", jsonFileName)
 	jsonFile, e := os.Open(jsonFileName)
 	if e != nil {
 		return e
@@ -108,17 +134,16 @@ func (c *AppEngine) jsonLoad(jsonFileName string) error {
 	if e != nil {
 		return e
 	}
-	log.Printf("JsonLoad: Success")
+	log.Printf("loadJson: Success")
 	return nil
 }
 
 func (c *AppEngine) LoadFileSettings(jsonFileName string) *AppEngine {
-	if len(jsonFileName) > 0 {
+	if jsonFileName != "" {
 		c.ConfigFileName = jsonFileName
 	}
-	log.Printf("AppEngine->LoadFileSettings: '%s'", c.ConfigFileName)
 	if c.jsonLoad(c.ConfigFileName) == nil {
-		log.Printf("AppEngine->LoadFileSettings: Success")
+		log.Printf("AppEngine->LoadFileSettings: '%s'", c.ConfigFileName)
 	}
 	return c
 }
@@ -129,8 +154,10 @@ func (c *AppEngine) LoadArgSettings() *AppEngine {
 	flag.StringVar(&c.Logs.FileName, "log", c.Logs.FileName, "Save logs in file")
 	flag.StringVar(&c.Audio.LocalPath, "audioPath", c.Audio.LocalPath, "enforce audio local path")
 	flag.BoolVar(&c.Audio.GenerateTTS, "generate-audio", c.Audio.GenerateTTS, "generate all TTS audio files")
-	flag.StringVar(&c.Timer.TargetTime, "time", c.Timer.TargetTime, "set target time to <hh[mm[ss]]>")
-	flag.StringVar(&c.Timer.TargetDelay, "delay", c.Timer.TargetDelay, "set target delay in <[[hh]mm]ss>")
+	flag.StringVar(&c.Timer.ListFile, "targets-file", c.Timer.ListFile, "set target list Json local file")
+	flag.StringVar(&c.Timer.ListURL, "targets-url", c.Timer.ListURL, "set target list Json URL")
+	flag.StringVar(&c.Timer.TargetTime, "target-time", c.Timer.TargetTime, "set target time to <hh[mm[ss]]>")
+	flag.StringVar(&c.Timer.TargetDelay, "target-delay", c.Timer.TargetDelay, "set target delay in <[[hh]mm]ss>")
 	flag.Parse()
 	return c
 }
@@ -176,23 +203,30 @@ func (c *AppEngine) SetLogOptions() *AppEngine {
 	return c
 }
 
-func (c *AppEngine) Name() string {
-	return c.name
-}
-
-func (c *AppEngine) Version() string {
-	return fmt.Sprintf("%d.%d.%d", c.version.major, c.version.minor, c.version.build)
-}
-
-func (c *AppEngine) Title() string {
-	return fmt.Sprintf("%s v%s", c.Name(), c.Version())
-}
-
-func (c *AppEngine) AlertName(alertTitle string) string {
-	for i, t := range c.Alerts.AlertSoundTitles {
-		if t == alertTitle {
-			return c.Alerts.AlertSoundNames[i]
-		}
+func (c *AppEngine) NextTarget() *AppEngine {
+	log.Printf("AppEngine->NextTarget")
+	if c.Timer.TargetDelay != "" {
+		c.Timer.Engine.SetDelayString(c.Timer.TargetDelay)
+	} else if c.Timer.TargetTime != "" {
+		c.Timer.Engine.SetTargetString(c.Timer.TargetTime)
+	} else {
+		next := c.Timer.List.NextTargetListItem()
+		c.Timer.Engine.SetTargetTime(next.Time())
+		c.Timer.Engine.SetTextLabel(next.TextLabel())
+		c.Timer.Engine.SetAlertSound(next.AlertSound())
 	}
-	return ""
+	return c
+}
+
+func (c *AppEngine) SetTargetTime(targetString string) *AppEngine {
+	log.Printf("AppEngine->SetTargetTime '%s'", targetString)
+	c.Timer.Engine.SetTargetString(targetString)
+	e := c.Timer.Engine.Error()
+	if e != nil {
+		log.Printf("AppEngine->SetTargetTime error: %s", e.Error())
+	} else {
+		c.Timer.Engine.SetTextLabel(timer.TargetTimeDefaultTextLabel)
+		c.Timer.Engine.SetAlertSound(c.Alerts.AlertSound)
+	}
+	return c
 }

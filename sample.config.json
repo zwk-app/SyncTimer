@@ -1,0 +1,9 @@
+{
+  "audioPath"      : "./res/audio",
+  "generate-audio" : false,
+  "proxy"          : "127.0.0.1:3128",
+  "targets-url"    : "https://raw.githubusercontent.com/zwk-app/SyncTimer/main/sample.targets.json",
+  "targets-file"   : "./sample.targets.json",
+  "target-time"    : "1200",
+  "target-delay"   : "30"
+}

@@ -29,23 +29,16 @@ func FixTimezone() {
 }
 
 func main() {
+	FixTimezone()
 	appEngine := tools.NewAppEngine(ApplicationName, MajorVersion, MinorVersion, BuildNumber, &EmbeddedFS)
 	appEngine.LoadEnvSettings().LoadFileSettings("").LoadArgSettings().SetLogOptions()
-	appEngine.Audio.Object = audio.NewAudioEngine(appEngine.EmbeddedFS, appEngine.Audio.EmbeddedPath, appEngine.Audio.LocalPath, "en")
-	appEngine.Timer.Object = timer.NewTargetTimer()
-
+	appEngine.Audio.Engine = audio.NewAudioEngine(appEngine.EmbeddedFS, appEngine.Audio.EmbeddedPath, appEngine.Audio.LocalPath, "en")
+	appEngine.Timer.List = timer.NewTargetList().LoadJsonURL(appEngine.Timer.ListURL).LoadJsonFile(appEngine.Timer.ListFile)
+	appEngine.Timer.Engine = timer.NewTargetTimer()
+	appEngine.NextTarget()
 	if appEngine.Audio.GenerateTTS {
-		appEngine.Audio.Object.GenerateAllAudioFiles(appEngine.Name())
+		appEngine.Audio.Engine.GenerateAllAudioFiles(appEngine.AppName())
 	} else {
-		FixTimezone()
-		if appEngine.Timer.TargetTime != "" {
-			_ = appEngine.Timer.Object.SetTargetString(appEngine.Timer.TargetTime)
-			appEngine.Timer.EnforceTarget = true
-		}
-		if appEngine.Timer.TargetDelay != "" {
-			_ = appEngine.Timer.Object.SetDelayString(appEngine.Timer.TargetDelay)
-			appEngine.Timer.EnforceTarget = true
-		}
 		ui.MainApp(appEngine)
 	}
 }
