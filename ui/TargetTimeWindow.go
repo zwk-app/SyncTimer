@@ -2,6 +2,7 @@ package ui
 
 import (
 	"SyncTimer/timer"
+	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
@@ -18,16 +19,26 @@ func TargetWindowOnClose() {
 	ShowMainWindow()
 }
 
-func TargetConfirmButtonOnClick() {
-	log.Printf("TargetConfirmButtonOnClick")
-	appEngine.SetTargetTime(targetInput.Text)
-	TargetWindowOnClose()
+func TargetInputValidator(s string) error {
+	if !timer.CheckTimeString(s) {
+		return fmt.Errorf("invalid")
+	}
+	return nil
 }
 
 func TargetInputOnSubmitted(s string) {
 	log.Printf("TargetInputOnSubmitted %s", s)
-	if timer.CheckTimeString(s) {
-		TargetConfirmButtonOnClick()
+	if TargetInputValidator(s) == nil {
+		TargetWindowConfirmButtonOnClick()
+	}
+}
+
+func TargetWindowConfirmButtonOnClick() {
+	log.Printf("TargetWindowConfirmButtonOnClick")
+	s := targetInput.Text
+	if TargetInputValidator(s) == nil {
+		appEngine.SetTargetTime(s)
+		TargetWindowOnClose()
 	}
 }
 
@@ -38,14 +49,17 @@ func TargetWindowContent() *fyne.Container {
 
 		/* Middle content */
 		targetInput = NewNumbersEntry()
+		targetInput.Validator = TargetInputValidator
 		targetInput.OnSubmitted = TargetInputOnSubmitted
 		targetInput.SetPlaceHolder("hh[mm[ss]]")
+		targetInput.TextStyle.Bold = true
+		targetInput.TextStyle.Monospace = true
 		targetContainer := container.NewCenter(targetInput)
 
 		/* Bottom buttons */
 		targetCancelButton := widget.NewButton("Cancel", TargetWindowOnClose)
 		targetCancelButton.SetIcon(theme.CancelIcon())
-		targetConfirmButton := widget.NewButton("Confirm", TargetConfirmButtonOnClick)
+		targetConfirmButton := widget.NewButton("Confirm", TargetWindowConfirmButtonOnClick)
 		targetConfirmButton.SetIcon(theme.ConfirmIcon())
 		bottomContainer := container.NewGridWithRows(1, targetCancelButton, targetConfirmButton)
 
