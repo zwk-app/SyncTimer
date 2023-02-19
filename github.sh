@@ -37,12 +37,13 @@ function AppVersion {
 function SetReleaseEnv {
   APP_NAME="$(AppName)"
   APP_VERS="$(AppVersion)"
-  echo "RELEASE_NAME=\"${APP_NAME} v${APP_VERS}\"" >> "${GITHUB_ENV}"
-  echo "RELEASE_TAG=\"v${APP_VERS}\"" >> "${GITHUB_ENV}"
+  echo "RELEASE_NAME=${APP_NAME} v${APP_VERS}" >> "${GITHUB_ENV}"
+  echo "RELEASE_TAG=v${APP_VERS}" >> "${GITHUB_ENV}"
 }
 
 function SetNextBuildNumber() {
   CURR_BUILD=$(grep "BuildNumber" version.go | awk '{print $4}')
+  # shellcheck disable=SC2004
   NEXT_BUILD=$((${CURR_BUILD}+1))
   sed -i -e "s/const\ BuildNumber\ =\ ${CURR_BUILD}/const\ BuildNumber\ =\ ${NEXT_BUILD}/" version.go
 }

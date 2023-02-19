@@ -17,14 +17,14 @@ var settingsVoiceAlertsCheck *widget.Check
 var settingsNotificationsCheck *widget.Check
 var settingsAlertSoundSelect *widget.Select
 
-func SettingsOnClose() {
-	log.Printf("SettingsOnClose")
+func SettingsWindowOnClose() {
+	log.Printf("SettingsWindowOnClose")
 	ShowMainWindow()
 }
 
 func SettingsToolbarMenuButtonOnClick() {
 	log.Printf("SettingsToolbarMenuButtonOnClick")
-	SettingsOnClose()
+	SettingsWindowOnClose()
 }
 
 func SettingsToolbarHelpButtonOnClick() {
@@ -34,6 +34,7 @@ func SettingsToolbarHelpButtonOnClick() {
 
 func SettingsAlertSoundSelectOnChange(alertTitle string) {
 	log.Printf("SettingsAlertSoundSelectOnChange: %s", alertTitle)
+	//goland:noinspection GoUnhandledErrorResult
 	go appEngine.Audio.Object.Play(appEngine.AlertName(alertTitle))
 }
 
@@ -43,7 +44,7 @@ func SettingsSaveButtonOnClick() {
 	appEngine.Alerts.Notifications = settingsNotificationsCheck.Checked
 	appEngine.Alerts.AlertSound = appEngine.AlertName(settingsAlertSoundSelect.Selected)
 	_ = appEngine.SaveFyneSettings()
-	SettingsOnClose()
+	SettingsWindowOnClose()
 }
 
 func SettingsWindowContent() *fyne.Container {
