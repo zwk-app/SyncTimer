@@ -213,7 +213,11 @@ func (c *AppEngine) NextTarget() *AppEngine {
 		next := c.Timer.List.NextTargetListItem()
 		c.Timer.Engine.SetTargetTime(next.Time())
 		c.Timer.Engine.SetTextLabel(next.TextLabel())
-		c.Timer.Engine.SetAlertSound(next.AlertSound())
+		if len(next.AlertSound()) > 0 {
+			c.Timer.Engine.SetAlertSound(next.AlertSound())
+		} else {
+			c.Timer.Engine.SetAlertSound(c.Alerts.AlertSound)
+		}
 	}
 	return c
 }
@@ -225,7 +229,7 @@ func (c *AppEngine) SetTargetTime(targetString string) *AppEngine {
 	if e != nil {
 		log.Printf("AppEngine->SetTargetTime error: %s", e.Error())
 	} else {
-		c.Timer.Engine.SetTextLabel(timer.TargetTimeDefaultTextLabel)
+		c.Timer.Engine.SetTextLabel(timer.DefaultTextLabel)
 		c.Timer.Engine.SetAlertSound(c.Alerts.AlertSound)
 	}
 	return c

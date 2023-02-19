@@ -21,8 +21,16 @@ func NewTargetListItem(timeString string, textLabel string, alertSound string) *
 		log.Printf("TargetListItem->NewTargetListItem error: %s", t.last.error.Error())
 	} else {
 		t.timeString = t.Object.TimeString()
-		t.textLabel = textLabel
-		t.alertSound = alertSound
+		if len(textLabel) > 0 {
+			t.textLabel = textLabel
+		} else {
+			t.textLabel = DefaultTextLabel
+		}
+		if len(alertSound) > 0 {
+			t.alertSound = alertSound
+		} else {
+			t.alertSound = DefaultAlertSound
+		}
 	}
 	return &t
 }

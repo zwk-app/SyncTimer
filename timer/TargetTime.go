@@ -7,7 +7,8 @@ import (
 	"time"
 )
 
-const TargetTimeDefaultTextLabel = "Target"
+const DefaultTextLabel = "Target"
+const DefaultAlertSound = "navy-14-wake-up"
 
 type TargetTime struct {
 	current    *Time
@@ -29,8 +30,8 @@ func NewTargetTimer() *TargetTime {
 	t := TargetTime{}
 	t.current = NewTime()
 	t.target = NewTime()
-	t.textLabel = ""
-	t.alertSound = ""
+	t.textLabel = DefaultTextLabel
+	t.alertSound = DefaultAlertSound
 	t.remaining.timeInSeconds = 0
 	t.remaining.hours = 0
 	t.remaining.minutes = 0
@@ -76,9 +77,6 @@ func (t *TargetTime) remainingTimeLoop(ch chan time.Time) {
 }
 
 func (t *TargetTime) TextLabel() string {
-	if t.textLabel == "" {
-		return TargetTimeDefaultTextLabel
-	}
 	return t.textLabel
 }
 
@@ -125,14 +123,23 @@ func (t *TargetTime) RemainingSeconds() int {
 }
 
 func (t *TargetTime) SetTextLabel(textLabel string) *TargetTime {
-	t.textLabel = textLabel
+	if len(textLabel) > 0 {
+		t.textLabel = textLabel
+	} else {
+		t.textLabel = DefaultTextLabel
+	}
 	return t
 }
 
 func (t *TargetTime) SetAlertSound(alertSound string) *TargetTime {
-	t.alertSound = alertSound
+	if len(alertSound) > 0 {
+		t.alertSound = alertSound
+	} else {
+		t.alertSound = DefaultAlertSound
+	}
 	return t
 }
+
 func (t *TargetTime) SetLocationName(locationName string) *TargetTime {
 	log.Printf("TargetTime->SetLocationName '%s'", locationName)
 	targetLocation := t.target.LocationName()
