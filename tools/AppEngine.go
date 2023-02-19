@@ -55,6 +55,9 @@ type AppEngine struct {
 		MainWindow fyne.Window
 	}
 	ProxyString string `json:"proxy"`
+	last        struct {
+		error error
+	}
 }
 
 func NewAppEngine(appName string, major int, minor int, build int, appEmbeddedFS *embed.FS) *AppEngine {
@@ -91,6 +94,12 @@ func NewAppEngine(appName string, major int, minor int, build int, appEmbeddedFS
 	c.Fyne.App = nil
 	c.ProxyString = ""
 	return &c
+}
+
+func (c *AppEngine) Error() error {
+	lastError := c.last.error
+	c.last.error = nil
+	return lastError
 }
 
 func (c *AppEngine) AppName() string {
@@ -227,6 +236,7 @@ func (c *AppEngine) SetTargetTime(targetString string) *AppEngine {
 	c.Timer.Engine.SetTargetString(targetString)
 	e := c.Timer.Engine.Error()
 	if e != nil {
+		c.last.error = e
 		log.Printf("AppEngine->SetTargetTime error: %s", e.Error())
 	} else {
 		c.Timer.Engine.SetTextLabel(timer.DefaultTextLabel)
