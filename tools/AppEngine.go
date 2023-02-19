@@ -28,7 +28,7 @@ type AppEngine struct {
 		FileName string `json:"log"`
 	}
 	Audio struct {
-		Object       *audio.TextToSpeech
+		Object       *audio.AudioEngine
 		Embedded     bool
 		EmbeddedPath string
 		LocalPath    string `json:"audioPath"`

@@ -31,12 +31,11 @@ func FixTimezone() {
 func main() {
 	appEngine := tools.NewAppEngine(ApplicationName, MajorVersion, MinorVersion, BuildNumber, &EmbeddedFS)
 	appEngine.LoadEnvSettings().LoadFileSettings("").LoadArgSettings().SetLogOptions()
-	appEngine.Audio.Object = audio.NewTextToSpeech(appEngine.Name(), appEngine.Audio.LocalPath, "en")
-	appEngine.Audio.Object.SetEmbeddedAudioFS(&EmbeddedFS, appEngine.Audio.EmbeddedPath)
+	appEngine.Audio.Object = audio.NewAudioEngine(appEngine.EmbeddedFS, appEngine.Audio.EmbeddedPath, appEngine.Audio.LocalPath, "en")
 	appEngine.Timer.Object = timer.NewTargetTimer()
 
 	if appEngine.Audio.GenerateTTS {
-		audio.GenerateAllAudioFiles(appEngine.Name(), appEngine.Audio.LocalPath)
+		appEngine.Audio.Object.GenerateAllAudioFiles(appEngine.Name())
 	} else {
 		FixTimezone()
 		if appEngine.Timer.TargetTime != "" {

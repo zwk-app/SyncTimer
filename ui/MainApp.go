@@ -15,6 +15,7 @@ var appEngine *tools.AppEngine
 func TextToSpeechAlert(name string) {
 	if appEngine.Alerts.TextToSpeech {
 		log.Printf("TextToSpeechAlert '%s'", name)
+		//goland:noinspection GoUnhandledErrorResult
 		go appEngine.Audio.Object.Play(name)
 	}
 }
