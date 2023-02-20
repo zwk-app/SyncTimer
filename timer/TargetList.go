@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -29,8 +30,16 @@ type TargetList struct {
 
 func NewTargetList() *TargetList {
 	t := TargetList{}
-	t.clear()
+	t.Append(NewTargetListItem("L1200", "Lunch Time", ""))
+	t.Append(NewTargetListItem("L1800", "Let's go Home", ""))
+	t.last.error = nil
 	return &t
+}
+
+func (t *TargetList) Error() error {
+	lastError := t.last.error
+	t.last.error = nil
+	return lastError
 }
 
 func (t *TargetList) NextTargetListItem() *TargetListItem {
@@ -46,12 +55,6 @@ func (t *TargetList) NextTargetListItem() *TargetListItem {
 		return t.items[0]
 	}
 	return NewTargetListItem("000000", "", "")
-}
-
-func (t *TargetList) Error() error {
-	lastError := t.last.error
-	t.last.error = nil
-	return lastError
 }
 
 func (t *TargetList) String() string {
@@ -95,35 +98,47 @@ func (t *TargetList) loadJson(jsonReader io.Reader) *TargetList {
 	return t
 }
 
-func (t *TargetList) LoadJsonFile(jsonFileName string) *TargetList {
-	if jsonFileName == "" {
+func (t *TargetList) loadJsonData(jsonData string) *TargetList {
+	if jsonData == "" {
 		return t
 	}
-	log.Printf("TargetList->LoadJsonFile: '%s'", jsonFileName)
-	f, e := os.Open(jsonFileName)
-	if e != nil {
-		t.last.error = e
-		log.Printf("TargetList->LoadJsonFile error: %s", t.last.error.Error())
-		return t
-	}
-	t.loadJson(f)
+	log.Printf("TargetList->loadJsonData\n%s", jsonData)
+	t.loadJson(strings.NewReader(jsonData))
 	if t.last.error != nil {
-		log.Printf("TargetList->LoadJsonFile error: %s", t.last.error.Error())
+		log.Printf("TargetList->loadJsonData error: %s", t.last.error.Error())
 	}
 	return t
 }
 
-func (t *TargetList) LoadJsonURL(jsonURL string) *TargetList {
+func (t *TargetList) loadJsonFile(jsonFileName string) *TargetList {
+	if jsonFileName == "" {
+		return t
+	}
+	log.Printf("TargetList->loadJsonFile %s", jsonFileName)
+	f, e := os.Open(jsonFileName)
+	if e != nil {
+		t.last.error = e
+		log.Printf("TargetList->loadJsonFile error: %s", t.last.error.Error())
+		return t
+	}
+	t.loadJson(f)
+	if t.last.error != nil {
+		log.Printf("TargetList->loadJsonFile error: %s", t.last.error.Error())
+	}
+	return t
+}
+
+func (t *TargetList) loadJsonURL(jsonURL string) *TargetList {
 	if jsonURL == "" {
 		return t
 	}
-	log.Printf("TargetList->LoadJsonURL '%s'", jsonURL)
+	log.Printf("TargetList->loadJsonURL %s", jsonURL)
 	u, e := url.Parse(jsonURL)
 	c := http.Client{}
 	r, e := c.Get(u.String())
 	if e != nil {
 		t.last.error = e
-		log.Printf("TargetList->LoadJsonURL error: %s", t.last.error.Error())
+		log.Printf("TargetList->loadJsonURL error: %s", t.last.error.Error())
 		return t
 	}
 	//goland:noinspection GoUnhandledErrorResult
@@ -131,12 +146,24 @@ func (t *TargetList) LoadJsonURL(jsonURL string) *TargetList {
 	if r.StatusCode == 200 {
 		t.loadJson(r.Body)
 		if t.last.error != nil {
-			log.Printf("TargetList->LoadJsonURL error: %s", t.last.error.Error())
+			log.Printf("TargetList->loadJsonURL error: %s", t.last.error.Error())
 		}
 		return t
 	} else {
 		t.last.error = fmt.Errorf("HTTP %d %s", r.StatusCode, r.Status)
-		log.Printf("TargetList->LoadJsonURL error: %s", t.last.error.Error())
+		log.Printf("TargetList->loadJsonURL error: %s", t.last.error.Error())
+	}
+	return t
+}
+
+func (t *TargetList) LoadJson(json string) *TargetList {
+	if len(json) > 0 {
+		if strings.HasPrefix(json, "{") && strings.HasSuffix(json, "}") {
+			return t.loadJsonData(json)
+		} else if strings.HasPrefix(json, "http") {
+			return t.loadJsonURL(json)
+		}
+		return t.loadJsonFile(json)
 	}
 	return t
 }

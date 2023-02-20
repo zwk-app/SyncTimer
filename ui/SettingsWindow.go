@@ -16,6 +16,7 @@ var settingsToolbarHelpButton *widget.ToolbarAction
 var settingsVoiceAlertsCheck *widget.Check
 var settingsNotificationsCheck *widget.Check
 var settingsAlertSoundSelect *widget.Select
+var settingsTargetsJsonEntry *widget.Entry
 
 func SettingsWindowOnClose() {
 	log.Printf("SettingsWindowOnClose")
@@ -43,6 +44,7 @@ func SettingsSaveButtonOnClick() {
 	appEngine.Alerts.TextToSpeech = settingsVoiceAlertsCheck.Checked
 	appEngine.Alerts.Notifications = settingsNotificationsCheck.Checked
 	appEngine.Alerts.AlertSound = appEngine.AlertName(settingsAlertSoundSelect.Selected)
+	appEngine.SetTargetJson(settingsTargetsJsonEntry.Text)
 	_ = appEngine.SaveFyneSettings()
 	SettingsWindowOnClose()
 }
@@ -69,7 +71,12 @@ func SettingsWindowContent() *fyne.Container {
 		settingsNotificationsForm := widget.NewFormItem("Notifications", settingsNotificationsCheck)
 		settingsAlertSoundSelect = widget.NewSelect(appEngine.Alerts.AlertSoundTitles, SettingsAlertSoundSelectOnChange)
 		settingsAlertSoundForm := widget.NewFormItem("Alert Sound", settingsAlertSoundSelect)
-		settingsForm := widget.NewForm(settingsVoiceAlertsForm, settingsNotificationsForm, settingsAlertSoundForm)
+		settingsTargetsJsonEntry = widget.NewEntry()
+		settingsTargetsJsonEntry = widget.NewMultiLineEntry()
+		settingsTargetsJsonEntry.SetMinRowsVisible(3)
+		settingsTargetsJsonEntry.SetText(appEngine.Timer.TargetsJson)
+		settingsTargetsJsonForm := widget.NewFormItem("Targets JSON", settingsTargetsJsonEntry)
+		settingsForm := widget.NewForm(settingsVoiceAlertsForm, settingsNotificationsForm, settingsAlertSoundForm, settingsTargetsJsonForm)
 
 		/* Bottom buttons */
 		saveSettingsButton := widget.NewButton("Save", SettingsSaveButtonOnClick)

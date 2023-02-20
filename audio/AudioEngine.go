@@ -15,6 +15,9 @@ type AudioEngine struct {
 	player         *AudioPlayer
 	textToSpeech   *TextToSpeech
 	localAudioPath string
+	last           struct {
+		error error
+	}
 }
 
 func NewAudioEngine(embeddedFS *embed.FS, embeddedAudioPath string, localAudioPath string, language string) *AudioEngine {
@@ -25,7 +28,14 @@ func NewAudioEngine(embeddedFS *embed.FS, embeddedAudioPath string, localAudioPa
 		localAudioPath += string(os.PathSeparator)
 	}
 	t.localAudioPath = localAudioPath
+	t.last.error = nil
 	return &t
+}
+
+func (t *AudioEngine) Error() error {
+	lastError := t.last.error
+	t.last.error = nil
+	return lastError
 }
 
 func (t *AudioEngine) GetFileName(shortName string) string {
@@ -45,14 +55,13 @@ func (t *AudioEngine) Create(shortName string, message string) error {
 	return nil
 }
 
-func (t *AudioEngine) Play(shortName string) error {
+func (t *AudioEngine) Play(shortName string) *AudioEngine {
 	log.Printf("AudioEngine->Play '%s'", shortName)
-	e := t.player.Play(t.GetFileName(shortName))
-	if e != nil {
-		log.Printf("AudioEngine->Play error: '%s'", e.Error())
-		return e
+	t.last.error = t.player.Play(t.GetFileName(shortName))
+	if t.last.error != nil {
+		log.Printf("AudioEngine->Play error: '%s'", t.last.error.Error())
 	}
-	return nil
+	return t
 }
 
 func (t *AudioEngine) generateLanguageFiles(appName string, language string) {

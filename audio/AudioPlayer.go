@@ -17,6 +17,9 @@ type AudioPlayer struct {
 	embeddedPath    string
 	channelCount    int
 	bitDepthInBytes int
+	last            struct {
+		error error
+	}
 }
 
 func NewAudioPlayer(embeddedFS *embed.FS, embeddedAudioPath string) *AudioPlayer {
@@ -25,7 +28,14 @@ func NewAudioPlayer(embeddedFS *embed.FS, embeddedAudioPath string) *AudioPlayer
 	p.embeddedPath = embeddedAudioPath
 	p.channelCount = 2
 	p.bitDepthInBytes = 2
+	p.last.error = nil
 	return &p
+}
+
+func (p *AudioPlayer) Error() error {
+	lastError := p.last.error
+	p.last.error = nil
+	return lastError
 }
 
 func (p *AudioPlayer) playMp3Content(fileBytes []byte) error {

@@ -37,8 +37,7 @@ type AppEngine struct {
 	Timer struct {
 		Engine       *timer.TargetTime
 		List         *timer.TargetList
-		ListURL      string `json:"targets-url"`
-		ListFile     string `json:"targets-file"`
+		TargetsJson  string `json:"targets-json"`
 		TargetTime   string `json:"target-time"`
 		TargetDelay  string `json:"target-delay"`
 		LocationName string
@@ -163,38 +162,42 @@ func (c *AppEngine) LoadArgSettings() *AppEngine {
 	flag.StringVar(&c.Logs.FileName, "log", c.Logs.FileName, "Save logs in file")
 	flag.StringVar(&c.Audio.LocalPath, "audioPath", c.Audio.LocalPath, "enforce audio local path")
 	flag.BoolVar(&c.Audio.GenerateTTS, "generate-audio", c.Audio.GenerateTTS, "generate all TTS audio files")
-	flag.StringVar(&c.Timer.ListFile, "targets-file", c.Timer.ListFile, "set target list Json local file")
-	flag.StringVar(&c.Timer.ListURL, "targets-url", c.Timer.ListURL, "set target list Json URL")
+	flag.StringVar(&c.Timer.TargetsJson, "targets-json", c.Timer.TargetsJson, "set targets list Json URL or filename")
 	flag.StringVar(&c.Timer.TargetTime, "target-time", c.Timer.TargetTime, "set target time to <hh[mm[ss]]>")
 	flag.StringVar(&c.Timer.TargetDelay, "target-delay", c.Timer.TargetDelay, "set target delay in <[[hh]mm]ss>")
 	flag.Parse()
 	return c
 }
 
-func (c *AppEngine) LoadFyneSettings() error {
+func (c *AppEngine) LoadFyneSettings() *AppEngine {
 	log.Printf("AppEngine->LoadFyneSettings")
 	if c.Fyne.App == nil {
 		log.Printf("AppEngine->LoadFyneSettings error: Fyne.App not set")
-		return fmt.Errorf("Fyne.App not set")
+		c.last.error = fmt.Errorf("Fyne.App not set")
+		return c
 	}
 	c.Timer.LocationName = c.Fyne.App.Preferences().StringWithFallback("currentLocationName", c.Timer.LocationName)
 	c.Alerts.TextToSpeech = c.Fyne.App.Preferences().BoolWithFallback("voiceAlertsEnabled", c.Alerts.TextToSpeech)
 	c.Alerts.Notifications = c.Fyne.App.Preferences().BoolWithFallback("notificationsEnabled", c.Alerts.Notifications)
 	c.Alerts.AlertSound = c.Fyne.App.Preferences().StringWithFallback("alertSound", c.Alerts.AlertSound)
-	return nil
+	c.SetTargetJson(c.Fyne.App.Preferences().StringWithFallback("targetsJson", c.Timer.TargetsJson))
+	return c
 }
 
-func (c *AppEngine) SaveFyneSettings() error {
+func (c *AppEngine) SaveFyneSettings() *AppEngine {
 	log.Printf("AppEngine->SaveFyneSettings")
 	if c.Fyne.App == nil {
 		log.Printf("AppEngine->SaveFyneSettings error: Fyne.App not set")
-		return fmt.Errorf("Fyne.App not set")
+		c.last.error = fmt.Errorf("Fyne.App not set")
+		return c
 	}
 	c.Fyne.App.Preferences().SetString("currentLocationName", c.Timer.LocationName)
 	c.Fyne.App.Preferences().SetBool("voiceAlertsEnabled", c.Alerts.TextToSpeech)
 	c.Fyne.App.Preferences().SetBool("notificationsEnabled", c.Alerts.Notifications)
 	c.Fyne.App.Preferences().SetString("alertSound", c.Alerts.AlertSound)
-	return nil
+	c.Fyne.App.Preferences().SetString("targetsJson", c.Timer.TargetsJson)
+	c.SetTargetJson(c.Timer.TargetsJson)
+	return c
 }
 
 func (c *AppEngine) SetLogOptions() *AppEngine {
@@ -212,22 +215,12 @@ func (c *AppEngine) SetLogOptions() *AppEngine {
 	return c
 }
 
-func (c *AppEngine) NextTarget() *AppEngine {
-	log.Printf("AppEngine->NextTarget")
-	if c.Timer.TargetDelay != "" {
-		c.Timer.Engine.SetDelayString(c.Timer.TargetDelay)
-	} else if c.Timer.TargetTime != "" {
-		c.Timer.Engine.SetTargetString(c.Timer.TargetTime)
-	} else {
-		next := c.Timer.List.NextTargetListItem()
-		c.Timer.Engine.SetTargetTime(next.Time())
-		c.Timer.Engine.SetTextLabel(next.TextLabel())
-		if len(next.AlertSound()) > 0 {
-			c.Timer.Engine.SetAlertSound(next.AlertSound())
-		} else {
-			c.Timer.Engine.SetAlertSound(c.Alerts.AlertSound)
-		}
+func (c *AppEngine) Play(shortName string) *AppEngine {
+	log.Printf("AppEngine->Play '%s'", shortName)
+	if c.Audio.Engine == nil {
+		c.Audio.Engine = audio.NewAudioEngine(c.EmbeddedFS, c.Audio.EmbeddedPath, c.Audio.LocalPath, "en")
 	}
+	c.Audio.Engine.Play(shortName)
 	return c
 }
 
@@ -241,6 +234,41 @@ func (c *AppEngine) SetTargetTime(targetString string) *AppEngine {
 	} else {
 		c.Timer.Engine.SetTextLabel(timer.DefaultTextLabel)
 		c.Timer.Engine.SetAlertSound(c.Alerts.AlertSound)
+	}
+	return c
+}
+
+func (c *AppEngine) SetTargetJson(s string) *AppEngine {
+	log.Printf("AppEngine->SetTargetJson '%s'", s)
+	if c.Timer.List == nil {
+		c.Timer.List = timer.NewTargetList()
+	}
+	if c.Timer.TargetsJson != s {
+		c.Timer.TargetsJson = s
+		c.Timer.List.LoadJson(c.Timer.TargetsJson)
+		c.NextTarget()
+	}
+	return c
+}
+
+func (c *AppEngine) NextTarget() *AppEngine {
+	log.Printf("AppEngine->NextTarget")
+	if c.Timer.Engine == nil {
+		c.Timer.Engine = timer.NewTargetTimer()
+	}
+	if c.Timer.TargetDelay != "" {
+		c.Timer.Engine.SetDelayString(c.Timer.TargetDelay)
+	} else if c.Timer.TargetTime != "" {
+		c.Timer.Engine.SetTargetString(c.Timer.TargetTime)
+	} else {
+		next := c.Timer.List.NextTargetListItem()
+		c.Timer.Engine.SetTargetTime(next.Time())
+		c.Timer.Engine.SetTextLabel(next.TextLabel())
+		if len(next.AlertSound()) > 0 {
+			c.Timer.Engine.SetAlertSound(next.AlertSound())
+		} else {
+			c.Timer.Engine.SetAlertSound(c.Alerts.AlertSound)
+		}
 	}
 	return c
 }
