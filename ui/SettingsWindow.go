@@ -55,7 +55,7 @@ func SettingsWindowContent() *fyne.Container {
 	if !settingsWindowInitialized {
 
 		/* Top toolbar */
-		settingsToolbarMenuButton = widget.NewToolbarAction(theme.MenuIcon(), SettingsToolbarMenuButtonOnClick)
+		settingsToolbarMenuButton = widget.NewToolbarAction(theme.NavigateBackIcon(), SettingsToolbarMenuButtonOnClick)
 		settingsToolbarHelpButton = widget.NewToolbarAction(theme.HelpIcon(), SettingsToolbarHelpButtonOnClick)
 		settingsToolbarMenu = widget.NewToolbar(
 			settingsToolbarMenuButton,

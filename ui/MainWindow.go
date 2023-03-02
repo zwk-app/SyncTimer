@@ -113,7 +113,7 @@ func MainWindowContent() *fyne.Container {
 		locationColor = color.NRGBA{R: 100, G: 100, B: 100, A: 255}
 
 		/* Top toolbar */
-		mainToolbarMenuButton = widget.NewToolbarAction(theme.MenuIcon(), MainToolbarMenuButtonOnClick)
+		mainToolbarMenuButton = widget.NewToolbarAction(theme.SettingsIcon(), MainToolbarMenuButtonOnClick)
 		mainToolbarTimezoneButton = widget.NewToolbarAction(theme.HomeIcon(), MainToolbarTimezoneButtonOnClick)
 		mainToolbarHelpButton = widget.NewToolbarAction(theme.HelpIcon(), MainToolbarHelpButtonOnClick)
 		mainToolbarMenu = widget.NewToolbar(
