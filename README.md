@@ -1,6 +1,6 @@
 [![CodeQL](https://github.com/zwk-app/SyncTimer/actions/workflows/codeql.yml/badge.svg)](https://github.com/zwk-app/SyncTimer/actions/workflows/codeql.yml)
 [![Dependency Review](https://github.com/zwk-app/SyncTimer/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/zwk-app/SyncTimer/actions/workflows/dependency-review.yml)
-[![Build Packages](https://github.com/zwk-app/SyncTimer/actions/workflows/build-packages.yml/badge.svg)](https://github.com/zwk-app/SyncTimer/actions/workflows/build-packages.yml)
+[![Build Packages](https://github.com/zwk-app/SyncTimer/actions/workflows/build.yml/badge.svg)](https://github.com/zwk-app/SyncTimer/actions/workflows/build.yml)
 [![VirusTotal](https://github.com/zwk-app/SyncTimer/actions/workflows/virustotal.yml/badge.svg)](https://github.com/zwk-app/SyncTimer/actions/workflows/virustotal.yml)
 
 ![SyncTimer screenshot](./res/SyncTimer.screenshot.small.png)
