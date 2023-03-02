@@ -75,11 +75,12 @@ func NewAppEngine(appName string, major int, minor int, build int, appEmbeddedFS
 	c.EmbeddedFS = appEmbeddedFS
 	c.Logs.StdOut = false
 	c.Logs.FileName = ""
-	c.Audio.Engine = nil
 	c.Audio.Embedded = true
 	c.Audio.EmbeddedPath = "res/audio/"
 	c.Audio.LocalPath = path.Clean(c.appPath + string(os.PathSeparator) + "res" + string(os.PathSeparator) + "audio" + string(os.PathSeparator))
 	c.Audio.GenerateTTS = false
+	//TODO: find a better way to set NewAudioEngine language & co
+	c.Audio.Engine = audio.NewAudioEngine(appEmbeddedFS, c.Audio.EmbeddedPath, c.Audio.LocalPath, "en")
 	c.Timer.Engine = nil
 	c.Timer.List = nil
 	c.Timer.TargetTime = ""
