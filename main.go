@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-//go:embed res/audio/*.mp3
+//go:embed res/icon.png res/audio/*.mp3
 var EmbeddedFS embed.FS
 
 // FixTimezone https://github.com/golang/go/issues/20455
@@ -28,7 +28,7 @@ func FixTimezone() {
 
 func main() {
 	FixTimezone()
-	appEngine := app.NewAppEngine(ApplicationName, MajorVersion, MinorVersion, BuildNumber, &EmbeddedFS, "res/")
+	appEngine := app.NewAppEngine(ApplicationName, MajorVersion, MinorVersion, BuildNumber, &EmbeddedFS, "")
 	appEngine.SetTargetJson(appEngine.Config.Target.JsonName).NextTarget()
 	if appEngine.Config.Audio.Make {
 		appEngine.Audio.GenerateAllAudioFiles(appEngine.AppName())

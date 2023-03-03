@@ -38,13 +38,12 @@ type Config struct {
 	} `json:"alerts"`
 }
 
-func NewConfig(appEngine *AppEngine, configFileName string) *Config {
+func NewConfig(appEngine *AppEngine) *Config {
 	r := &Config{}
 	r.app = appEngine
 	if r.app == nil {
 		LogsCriticalErrorExit("AppConfig", "NewAppConfig: AppEngine is not set", nil)
 	}
-	r.LoadEnvironment().LoadConfigFile(configFileName).LoadCommandLineArguments()
 	return r
 }
 
@@ -84,11 +83,11 @@ func (r *Config) LoadConfigFile(jsonFileName string) *Config {
 func (r *Config) LoadCommandLineArguments() *Config {
 	flag.BoolVar(&r.Logs.StdOut, "stdout", r.Logs.StdOut, "Display app.logs in Stdout")
 	flag.StringVar(&r.Logs.FileName, "log", r.Logs.FileName, "Save app.logs in file")
-	flag.StringVar(&r.Audio.LocalPath, "app.audio-path", r.Audio.LocalPath, "enforce app.audio local path")
-	flag.BoolVar(&r.Audio.Make, "app.audio-make", r.Audio.Make, "generate all TTS app.audio files")
-	flag.StringVar(&r.Target.JsonName, "targets-json", r.Target.JsonName, "set targets list Json URL or filename")
-	flag.StringVar(&r.Target.Time, "target-time", r.Target.Time, "set target time to <hh[mm[ss]]>")
-	flag.StringVar(&r.Target.Delay, "target-delay", r.Target.Delay, "set target delay in <[[hh]mm]ss>")
+	flag.StringVar(&r.Audio.LocalPath, "audio-path", r.Audio.LocalPath, "enforce app.audio local path")
+	flag.BoolVar(&r.Audio.Make, "audio-make", r.Audio.Make, "generate all TTS app.audio files")
+	flag.StringVar(&r.Target.JsonName, "targets-json", r.Target.JsonName, "set targets Json list URL or filename")
+	flag.StringVar(&r.Target.Time, "time", r.Target.Time, "set target time to <hh[mm[ss]]>")
+	flag.StringVar(&r.Target.Delay, "delay", r.Target.Delay, "set target delay in <[[hh]mm]ss>")
 	flag.Parse()
 	return r
 }

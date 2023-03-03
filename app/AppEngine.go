@@ -3,6 +3,7 @@ package app
 import (
 	"SyncTimer/app/audio"
 	"SyncTimer/app/timer"
+	"SyncTimer/tools"
 	"embed"
 	"fmt"
 	"fyne.io/fyne/v2"
@@ -21,11 +22,13 @@ type AppEngine struct {
 		build int
 	}
 	local struct {
-		path string
+		path      string
+		audioPath string
 	}
 	embedded struct {
-		fs   *embed.FS
-		path string
+		fs        *embed.FS
+		path      string
+		audioPath string
 	}
 	Config     *Config
 	Logs       *Logs
@@ -44,27 +47,41 @@ func NewAppEngine(appName string, majorVersion int, minorVersion int, buildNumbe
 	r.version.minor = minorVersion
 	r.version.build = buildNumber
 	r.SetLocalPath()
+	r.local.audioPath = r.GetPath(r.local.path + "res/audio")
 	r.embedded.fs = embeddedFS
-	r.embedded.path = embeddedPath
-	r.Config = NewConfig(r, path.Clean(r.local.path+string(os.PathSeparator)+r.name+".json"))
+	r.embedded.path = r.GetEmbeddedPath(embeddedPath)
+	r.embedded.audioPath = r.GetEmbeddedPath(r.embedded.path + "res/audio")
+	r.Config = NewConfig(r)
+	r.Config.Location.Name = timer.LocalLocationName
+	r.Config.Alerts.TextToSpeech = true
+	r.Config.Alerts.Notifications = false
+	r.Config.Alerts.AlarmSound = "navy-14-wake-up"
+	r.Config.LoadEnvironment().LoadConfigFile(r.DefaultConfigFileName()).LoadCommandLineArguments()
 	r.Logs = NewAppLogs(r, LogsDebug)
 	configJson, e := r.Config.ToJson()
-	r.Logs.Debug("AppEngine", fmt.Sprintf("Config: \n%s", configJson), e)
-	r.Audio = audio.NewAudioEngine(r.embedded.fs, r.embedded.path+"audio", r.local.path+"res/audio", "en")
+	r.Audio = audio.NewAudioEngine(r.embedded.fs, r.embedded.audioPath, r.local.audioPath, "en")
 	r.Timer = nil
 	r.List = nil
 	r.FyneApp = nil
 	r.FyneWindow = nil
 	r.lastError = nil
+	r.Logs.Debug("AppEngine", fmt.Sprintf("Config: \n%s", configJson), e)
 	return r
 }
 
-func (r *AppEngine) GetPath(linuxStylePath string) string {
-	p := path.Clean(strings.ReplaceAll(linuxStylePath, "/", string(os.PathSeparator)))
-	if !strings.HasSuffix(linuxStylePath, string(os.PathSeparator)) {
-		p += string(os.PathSeparator)
+func (r *AppEngine) GetEmbeddedPath(linuxStylePath string) string {
+	if len(linuxStylePath) > 0 {
+		p := strings.ReplaceAll(linuxStylePath, "/", string(os.PathSeparator))
+		if !strings.HasSuffix(linuxStylePath, string(os.PathSeparator)) {
+			p += string(os.PathSeparator)
+		}
+		return p
 	}
-	return p
+	return ""
+}
+
+func (r *AppEngine) GetPath(linuxStylePath string) string {
+	return r.GetEmbeddedPath(path.Clean(linuxStylePath))
 }
 
 func (r *AppEngine) SetLocalPath() {
@@ -115,6 +132,14 @@ func (r *AppEngine) AppVersionWithBuild() string {
 
 func (r *AppEngine) AppTitle() string {
 	return fmt.Sprintf("%s v%s", r.AppName(), r.AppVersion())
+}
+
+func (r *AppEngine) DefaultConfigFileName() string {
+	return r.GetPath(fmt.Sprintf("%s/%s.json", r.local.path, tools.AlphaNums(r.name)))
+}
+
+func (r *AppEngine) DefaultLogsFileName() string {
+	return r.GetPath(fmt.Sprintf("%s/%s.log", r.local.path, tools.AlphaNums(r.name)))
 }
 
 func (r *AppEngine) AlarmSoundNames() []string {
