@@ -2,7 +2,7 @@
 
 ## Voice Alerts
 
-Voice audio files were generated using Google TTS.
+Voice app.audio files were generated using Google TTS.
 
 * about.en.mp3
 * target-[00-60]-[hours|minutes|seconds].en.mp3

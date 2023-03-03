@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"SyncTimer/timer"
+	"SyncTimer/app/timer"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -71,8 +71,8 @@ func TargetWindowContent() *fyne.Container {
 }
 func ShowTargetWindow() {
 	log.Printf("ShowTargetWindow")
-	appEngine.Fyne.MainWindow.SetContent(TargetWindowContent())
+	appEngine.FyneWindow.SetContent(TargetWindowContent())
 	targetInput.SetText("")
-	appEngine.Fyne.MainWindow.Show()
-	appEngine.Fyne.MainWindow.Canvas().Focus(targetInput)
+	appEngine.FyneWindow.Show()
+	appEngine.FyneWindow.Canvas().Focus(targetInput)
 }

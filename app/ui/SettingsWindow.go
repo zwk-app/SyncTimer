@@ -36,16 +36,16 @@ func SettingsToolbarHelpButtonOnClick() {
 func SettingsAlertSoundSelectOnChange(alertTitle string) {
 	log.Printf("SettingsAlertSoundSelectOnChange: %s", alertTitle)
 	//goland:noinspection GoUnhandledErrorResult
-	go appEngine.Audio.Engine.Play(appEngine.AlertName(alertTitle))
+	go appEngine.Audio.Play(appEngine.AlarmSoundName(alertTitle))
 }
 
 func SettingsSaveButtonOnClick() {
 	log.Printf("SettingsSaveButtonOnClick")
-	appEngine.Alerts.TextToSpeech = settingsVoiceAlertsCheck.Checked
-	appEngine.Alerts.Notifications = settingsNotificationsCheck.Checked
-	appEngine.Alerts.AlertSound = appEngine.AlertName(settingsAlertSoundSelect.Selected)
+	appEngine.Config.Alerts.TextToSpeech = settingsVoiceAlertsCheck.Checked
+	appEngine.Config.Alerts.Notifications = settingsNotificationsCheck.Checked
+	appEngine.Config.Alerts.AlarmSound = appEngine.AlarmSoundName(settingsAlertSoundSelect.Selected)
 	appEngine.SetTargetJson(settingsTargetsJsonEntry.Text)
-	_ = appEngine.SaveFyneSettings()
+	_ = appEngine.Config.SaveFyneSettings()
 	SettingsWindowOnClose()
 }
 
@@ -69,12 +69,12 @@ func SettingsWindowContent() *fyne.Container {
 		settingsVoiceAlertsForm := widget.NewFormItem("Voice Alerts", settingsVoiceAlertsCheck)
 		settingsNotificationsCheck = widget.NewCheck("", func(b bool) {})
 		settingsNotificationsForm := widget.NewFormItem("Notifications", settingsNotificationsCheck)
-		settingsAlertSoundSelect = widget.NewSelect(appEngine.Alerts.AlertSoundTitles, SettingsAlertSoundSelectOnChange)
+		settingsAlertSoundSelect = widget.NewSelect(appEngine.AlarmSoundTitles(), SettingsAlertSoundSelectOnChange)
 		settingsAlertSoundForm := widget.NewFormItem("Alert Sound", settingsAlertSoundSelect)
 		settingsTargetsJsonEntry = widget.NewEntry()
 		settingsTargetsJsonEntry = widget.NewMultiLineEntry()
 		settingsTargetsJsonEntry.SetMinRowsVisible(3)
-		settingsTargetsJsonEntry.SetText(appEngine.Timer.TargetsJson)
+		settingsTargetsJsonEntry.SetText(appEngine.Config.Target.JsonName)
 		settingsTargetsJsonForm := widget.NewFormItem("Targets JSON", settingsTargetsJsonEntry)
 		settingsForm := widget.NewForm(settingsVoiceAlertsForm, settingsNotificationsForm, settingsAlertSoundForm, settingsTargetsJsonForm)
 
@@ -91,9 +91,9 @@ func SettingsWindowContent() *fyne.Container {
 }
 func ShowSettingsWindow() {
 	log.Printf("ShowSettingsWindow")
-	appEngine.Fyne.MainWindow.SetContent(SettingsWindowContent())
-	settingsVoiceAlertsCheck.SetChecked(appEngine.Alerts.TextToSpeech)
-	settingsNotificationsCheck.SetChecked(appEngine.Alerts.Notifications)
-	settingsAlertSoundSelect.SetSelected(appEngine.Alerts.AlertSound)
-	appEngine.Fyne.MainWindow.Show()
+	appEngine.FyneWindow.SetContent(SettingsWindowContent())
+	settingsVoiceAlertsCheck.SetChecked(appEngine.Config.Alerts.TextToSpeech)
+	settingsNotificationsCheck.SetChecked(appEngine.Config.Alerts.Notifications)
+	settingsAlertSoundSelect.SetSelected(appEngine.Config.Alerts.AlarmSound)
+	appEngine.FyneWindow.Show()
 }

@@ -20,7 +20,11 @@ type Time struct {
 	}
 }
 
+//goland:noinspection ALL
 const LocalLocationName = "Local Time"
+
+//goland:noinspection ALL
+const UtcLocationName = "UTC"
 
 func NewTime() *Time {
 	return &Time{

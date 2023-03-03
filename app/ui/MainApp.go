@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"SyncTimer/tools"
+	app2 "SyncTimer/app"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -10,20 +10,20 @@ import (
 	"time"
 )
 
-var appEngine *tools.AppEngine
+var appEngine *app2.AppEngine
 
 func TextToSpeechAlert(name string) {
-	if appEngine.Alerts.TextToSpeech {
+	if appEngine.Config.Alerts.TextToSpeech {
 		log.Printf("TextToSpeechAlert '%s'", name)
 		//goland:noinspection GoUnhandledErrorResult
-		go appEngine.Audio.Engine.Play(name)
+		go appEngine.Audio.Play(name)
 	}
 }
 
 func NotificationAlert(message string) {
-	if appEngine.Alerts.Notifications {
+	if appEngine.Config.Alerts.Notifications {
 		log.Printf("NotificationAlert '%s'", message)
-		go appEngine.Fyne.App.SendNotification(fyne.NewNotification(appEngine.AppTitle(), message))
+		go appEngine.FyneApp.SendNotification(fyne.NewNotification(appEngine.AppTitle(), message))
 	}
 }
 
@@ -35,7 +35,7 @@ func AlertLoop() {
 		lastCheck := 0
 		lastCheckDiff := 0
 		for {
-			currentCheck = appEngine.Timer.Engine.RemainingSeconds()
+			currentCheck = appEngine.Timer.RemainingSeconds()
 			lastCheckDiff = lastCheck - currentCheck
 			if lastCheck < currentCheck {
 				log.Printf("AlertLoop : %08d << %08d (%02d)", lastCheck, currentCheck, lastCheckDiff)
@@ -46,11 +46,11 @@ func AlertLoop() {
 				currentCheck = lastCheck - 1
 			}
 			if currentCheck < lastCheck {
-				h, m, s := appEngine.Timer.Engine.RemainingTime()
+				h, m, s := appEngine.Timer.RemainingTime()
 				if currentCheck >= 0 {
 					if currentCheck < 11 {
 						if currentCheck == 0 {
-							TextToSpeechAlert(appEngine.Alerts.AlertSound)
+							TextToSpeechAlert(appEngine.Config.Alerts.AlarmSound)
 						} else if currentCheck%2 == 0 {
 							// every 2 sec if T <= 10s
 							TextToSpeechAlert(fmt.Sprintf("target-%02d-seconds", s))
@@ -98,17 +98,17 @@ func AlertLoop() {
 	}()
 }
 
-func MainApp(a *tools.AppEngine) {
+func MainApp(a *app2.AppEngine) {
 	appEngine = a
 	e := os.Setenv("FYNE_THEME", "dark")
 	if e != nil {
 		log.Println("Setenv error?")
 	}
-	appEngine.Fyne.App = app.NewWithID(appEngine.AppName())
-	_ = appEngine.LoadFyneSettings()
+	appEngine.FyneApp = app.NewWithID(appEngine.AppName())
+	_ = appEngine.Config.LoadFyneSettings()
 	AlertLoop()
-	appEngine.Fyne.MainWindow = appEngine.Fyne.App.NewWindow(appEngine.AppTitle())
-	appEngine.Fyne.MainWindow.Resize(fyne.NewSize(320, 540))
+	appEngine.FyneWindow = appEngine.FyneApp.NewWindow(appEngine.AppTitle())
+	appEngine.FyneWindow.Resize(fyne.NewSize(320, 540))
 	ShowMainWindow()
-	appEngine.Fyne.App.Run()
+	appEngine.FyneApp.Run()
 }

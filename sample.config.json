@@ -1,8 +1,28 @@
 {
-  "audioPath"      : "./res/audio",
-  "generate-audio" : false,
-  "proxy"          : "127.0.0.1:3128",
-  "targets-json"    : "https://raw.githubusercontent.com/zwk-app/SyncTimer/main/sample.targets.json",
-  "target-time"    : "1200",
-  "target-delay"   : "30"
+  "logs": {
+    "stdout": false,
+    "filename": ""
+  },
+  "proxy": {
+    "url": "127.0.0.1:3128",
+    "server": "127.0.0.1",
+    "port": 3128
+  },
+  "audio": {
+    "path": "./res/audio",
+    "make": false
+  },
+  "Location": {
+    "Name": "Local Time"
+  },
+  "target": {
+    "json": "https://raw.githubusercontent.com/zwk-app/SyncTimer/main/sample.targets.json",
+    "time": "1200",
+    "delay": "30"
+  },
+  "alerts": {
+    "tts": false,
+    "notif": false,
+    "alarm": ""
+  }
 }

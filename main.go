@@ -1,8 +1,8 @@
 package main
 
 import (
-	"SyncTimer/tools"
-	"SyncTimer/ui"
+	"SyncTimer/app"
+	"SyncTimer/app/ui"
 	"embed"
 	"os/exec"
 	"strings"
@@ -28,11 +28,10 @@ func FixTimezone() {
 
 func main() {
 	FixTimezone()
-	appEngine := tools.NewAppEngine(ApplicationName, MajorVersion, MinorVersion, BuildNumber, &EmbeddedFS)
-	appEngine.LoadEnvSettings().LoadFileSettings("").LoadArgSettings().SetLogOptions()
-	appEngine.SetTargetJson(appEngine.Timer.TargetsJson).NextTarget()
-	if appEngine.Audio.GenerateTTS {
-		appEngine.Audio.Engine.GenerateAllAudioFiles(appEngine.AppName())
+	appEngine := app.NewAppEngine(ApplicationName, MajorVersion, MinorVersion, BuildNumber, &EmbeddedFS, "res/")
+	appEngine.SetTargetJson(appEngine.Config.Target.JsonName).NextTarget()
+	if appEngine.Config.Audio.Make {
+		appEngine.Audio.GenerateAllAudioFiles(appEngine.AppName())
 	} else {
 		ui.MainApp(appEngine)
 	}
