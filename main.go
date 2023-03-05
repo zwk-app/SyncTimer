@@ -1,15 +1,20 @@
 package main
 
 import (
-	"SyncTimer/app"
-	"SyncTimer/app/ui"
+	"SyncTimer/audio"
+	"SyncTimer/config"
+	"SyncTimer/logs"
+	"SyncTimer/resources"
+	"SyncTimer/timer"
+	"SyncTimer/ui"
 	"embed"
+	"fmt"
 	"os/exec"
 	"strings"
 	"time"
 )
 
-//go:embed res/icon.png res/audio/*.mp3
+//go:embed res/icon.png res/images/*.svg res/audio/*.mp3
 var EmbeddedFS embed.FS
 
 // FixTimezone https://github.com/golang/go/issues/20455
@@ -28,11 +33,20 @@ func FixTimezone() {
 
 func main() {
 	FixTimezone()
-	appEngine := app.NewAppEngine(ApplicationName, MajorVersion, MinorVersion, BuildNumber, &EmbeddedFS, "")
-	appEngine.SetTargetJson(appEngine.Config.Target.JsonName).NextTarget()
-	if appEngine.Config.Audio.Make {
-		appEngine.Audio.GenerateAllAudioFiles(appEngine.AppName())
-	} else {
-		ui.MainApp(appEngine)
+	resources.SetEmbedded(&EmbeddedFS)
+	config.SetAppInfo(ApplicationName, MajorVersion, MinorVersion, BuildNumber)
+	config.LoadEnvironment()
+	_ = config.LoadFile("")
+	config.LoadArguments()
+	if currentConfig, e := config.ToJson(); e == nil {
+		logs.Debug("Main", fmt.Sprintf("CurrentConfig: %s", currentConfig), nil)
 	}
+	timer.SetTargetJson(config.Target().JsonName)
+	timer.NextTarget()
+	if config.Config().Audio.Make {
+		audio.GenerateAll(config.Name())
+	} else {
+		ui.MainApp()
+	}
+
 }

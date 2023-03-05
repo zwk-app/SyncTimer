@@ -1,8 +1,8 @@
 package timer
 
 import (
+	"SyncTimer/config"
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 	"unicode"
@@ -21,15 +21,11 @@ type Time struct {
 }
 
 //goland:noinspection ALL
-const LocalLocationName = "Local Time"
-
-//goland:noinspection ALL
-const UtcLocationName = "UTC"
 
 func NewTime() *Time {
 	return &Time{
 		location:     time.Local,
-		locationName: LocalLocationName,
+		locationName: config.LocalLocationName,
 		time:         time.Now().In(time.Local),
 		hours:        time.Now().In(time.Local).Hour(),
 		minutes:      time.Now().In(time.Local).Minute(),
@@ -70,10 +66,10 @@ func (t *Time) SetLocation(location *time.Location) *Time {
 			t.locationName = "UTC"
 		case time.Local:
 			t.location = time.Local
-			t.locationName = LocalLocationName
+			t.locationName = config.LocalLocationName
 		default:
 			t.location = time.Local
-			t.locationName = LocalLocationName
+			t.locationName = config.LocalLocationName
 		}
 		t.Set(t.time.In(location))
 	}
@@ -83,9 +79,9 @@ func (t *Time) SetLocation(location *time.Location) *Time {
 func (t *Time) SetLocationName(location string) *Time {
 	if t.locationName != location {
 		switch location {
-		case "UTC":
+		case config.UtcLocationName:
 			t.SetLocation(time.UTC)
-		case LocalLocationName:
+		case config.LocalLocationName:
 			t.SetLocation(time.Local)
 		default:
 			t.SetLocation(time.Local)
@@ -131,7 +127,6 @@ func (t *Time) SetTimeString(timeString string) *Time {
 				}
 			default:
 				t.last.error = fmt.Errorf("invalid time string '%s'", timeString)
-				log.Printf("Time->SetTimeString error: %s", t.last.error.Error())
 				return t
 			}
 			timeString = timeString[1:]
@@ -139,12 +134,10 @@ func (t *Time) SetTimeString(timeString string) *Time {
 		h, m, s, e := TimeFromString(timeString)
 		if e != nil {
 			t.last.error = e
-			log.Printf("Time->SetTimeString error: %s", t.last.error.Error())
 			return t
 		}
 		t.SetTime(h, m, s)
 		if t.last.error != nil {
-			log.Printf("Time->SetTimeString error: %s", t.last.error.Error())
 			return t
 		}
 		if currentLocation != t.location {
@@ -153,7 +146,6 @@ func (t *Time) SetTimeString(timeString string) *Time {
 		return t
 	}
 	t.last.error = fmt.Errorf("invalid time string '%s'", timeString)
-	log.Printf("Time->SetTimeString error: %s", t.last.error.Error())
 	return t
 }
 

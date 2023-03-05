@@ -1,38 +1,36 @@
 package timer
 
 import (
-	"log"
+	"SyncTimer/config"
 )
 
 type TargetListItem struct {
 	Object     *Time
 	timeString string
 	textLabel  string
-	alertSound string
+	alarmSound string
 	last       struct {
 		error error
 	}
 }
 
 func NewTargetListItem(timeString string, textLabel string, alertSound string) *TargetListItem {
-	t := TargetListItem{}
+	t := new(TargetListItem)
 	t.Object = NewTime().SetTimeString(timeString)
-	if t.last.error != nil {
-		log.Printf("TargetListItem->NewTargetListItem error: %s", t.last.error.Error())
-	} else {
+	if t.last.error == nil {
 		t.timeString = t.Object.TimeString()
 		if len(textLabel) > 0 {
 			t.textLabel = textLabel
 		} else {
-			t.textLabel = DefaultTextLabel
+			t.textLabel = config.DefaultTextLabel
 		}
 		if len(alertSound) > 0 {
-			t.alertSound = alertSound
+			t.alarmSound = alertSound
 		} else {
-			t.alertSound = DefaultAlertSound
+			t.alarmSound = config.DefaultAlarmSound
 		}
 	}
-	return &t
+	return t
 }
 
 func (t *TargetListItem) Error() error {
@@ -54,6 +52,6 @@ func (t *TargetListItem) TextLabel() string {
 	return t.textLabel
 }
 
-func (t *TargetListItem) AlertSound() string {
-	return t.alertSound
+func (t *TargetListItem) AlarmSound() string {
+	return t.alarmSound
 }

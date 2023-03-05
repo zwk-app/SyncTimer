@@ -1,11 +1,16 @@
 package ui
 
 import (
+	"SyncTimer/audio"
+	"SyncTimer/config"
+	"SyncTimer/logs"
+	"SyncTimer/resources"
+	"SyncTimer/timer"
+	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"log"
 )
 
 var settingsWindowInitialized = false
@@ -19,38 +24,36 @@ var settingsAlertSoundSelect *widget.Select
 var settingsTargetsJsonEntry *widget.Entry
 
 func SettingsWindowOnClose() {
-	log.Printf("SettingsWindowOnClose")
+	logs.Debug("SettingsWindow", fmt.Sprintf("OnClose"), nil)
 	ShowMainWindow()
 }
 
 func SettingsToolbarMenuButtonOnClick() {
-	log.Printf("SettingsToolbarMenuButtonOnClick")
+	logs.Debug("SettingsWindow", fmt.Sprintf("MenuButtonOnClick"), nil)
 	SettingsWindowOnClose()
 }
 
 func SettingsToolbarHelpButtonOnClick() {
-	log.Printf("SettingsToolbarHelpButtonOnClick")
-
+	logs.Debug("SettingsWindow", fmt.Sprintf("HelpButtonOnClick"), nil)
 }
 
 func SettingsAlertSoundSelectOnChange(alertTitle string) {
-	log.Printf("SettingsAlertSoundSelectOnChange: %s", alertTitle)
-	//goland:noinspection GoUnhandledErrorResult
-	go appEngine.Audio.Play(appEngine.AlarmSoundName(alertTitle))
+	logs.Debug("SettingsWindow", fmt.Sprintf("AlertSoundSelectOnChange: '%s'", alertTitle), nil)
+	go audio.Play(resources.AlarmSoundName(alertTitle))
 }
 
 func SettingsSaveButtonOnClick() {
-	log.Printf("SettingsSaveButtonOnClick")
-	appEngine.Config.Alerts.TextToSpeech = settingsVoiceAlertsCheck.Checked
-	appEngine.Config.Alerts.Notifications = settingsNotificationsCheck.Checked
-	appEngine.Config.Alerts.AlarmSound = appEngine.AlarmSoundName(settingsAlertSoundSelect.Selected)
-	appEngine.SetTargetJson(settingsTargetsJsonEntry.Text)
-	_ = appEngine.Config.SaveFyneSettings()
+	logs.Debug("SettingsWindow", fmt.Sprintf("SaveButtonOnClick"), nil)
+	config.Alerts().TextToSpeech = settingsVoiceAlertsCheck.Checked
+	config.Alerts().Notifications = settingsNotificationsCheck.Checked
+	config.Alerts().AlarmSound = resources.AlarmSoundName(settingsAlertSoundSelect.Selected)
+	timer.SetTargetJson(settingsTargetsJsonEntry.Text)
+	config.SaveFyneSettings(FyneApp)
 	SettingsWindowOnClose()
 }
 
 func SettingsWindowContent() *fyne.Container {
-	log.Printf("SettingsWindowContent")
+	logs.Debug("SettingsWindow", fmt.Sprintf("Content"), nil)
 
 	if !settingsWindowInitialized {
 
@@ -69,12 +72,12 @@ func SettingsWindowContent() *fyne.Container {
 		settingsVoiceAlertsForm := widget.NewFormItem("Voice Alerts", settingsVoiceAlertsCheck)
 		settingsNotificationsCheck = widget.NewCheck("", func(b bool) {})
 		settingsNotificationsForm := widget.NewFormItem("Notifications", settingsNotificationsCheck)
-		settingsAlertSoundSelect = widget.NewSelect(appEngine.AlarmSoundTitles(), SettingsAlertSoundSelectOnChange)
+		settingsAlertSoundSelect = widget.NewSelect(resources.AlarmSoundTitles(), SettingsAlertSoundSelectOnChange)
 		settingsAlertSoundForm := widget.NewFormItem("Alert Sound", settingsAlertSoundSelect)
 		settingsTargetsJsonEntry = widget.NewEntry()
 		settingsTargetsJsonEntry = widget.NewMultiLineEntry()
 		settingsTargetsJsonEntry.SetMinRowsVisible(3)
-		settingsTargetsJsonEntry.SetText(appEngine.Config.Target.JsonName)
+		settingsTargetsJsonEntry.SetText(config.Target().JsonName)
 		settingsTargetsJsonForm := widget.NewFormItem("Targets JSON", settingsTargetsJsonEntry)
 		settingsForm := widget.NewForm(settingsVoiceAlertsForm, settingsNotificationsForm, settingsAlertSoundForm, settingsTargetsJsonForm)
 
@@ -90,10 +93,10 @@ func SettingsWindowContent() *fyne.Container {
 	return settingsWindowContainer
 }
 func ShowSettingsWindow() {
-	log.Printf("ShowSettingsWindow")
-	appEngine.FyneWindow.SetContent(SettingsWindowContent())
-	settingsVoiceAlertsCheck.SetChecked(appEngine.Config.Alerts.TextToSpeech)
-	settingsNotificationsCheck.SetChecked(appEngine.Config.Alerts.Notifications)
-	settingsAlertSoundSelect.SetSelected(appEngine.Config.Alerts.AlarmSound)
-	appEngine.FyneWindow.Show()
+	logs.Debug("SettingsWindow", fmt.Sprintf("Show"), nil)
+	FyneWindow.SetContent(SettingsWindowContent())
+	settingsVoiceAlertsCheck.SetChecked(config.Alerts().TextToSpeech)
+	settingsNotificationsCheck.SetChecked(config.Alerts().Notifications)
+	settingsAlertSoundSelect.SetSelected(config.Alerts().AlarmSound)
+	FyneWindow.Show()
 }
