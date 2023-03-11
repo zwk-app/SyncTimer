@@ -1,9 +1,9 @@
 package resources
 
 import (
-	"SyncTimer/logs"
 	"embed"
 	"fmt"
+	"github.com/zwk-app/go-tools/logs"
 	"strings"
 )
 

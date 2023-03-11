@@ -3,11 +3,11 @@ package ui
 import (
 	"SyncTimer/audio"
 	"SyncTimer/config"
-	"SyncTimer/logs"
 	"SyncTimer/timer"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"github.com/zwk-app/go-tools/logs"
 	"os"
 	"time"
 )

@@ -3,12 +3,13 @@ package main
 import (
 	"SyncTimer/audio"
 	"SyncTimer/config"
-	"SyncTimer/logs"
 	"SyncTimer/resources"
 	"SyncTimer/timer"
 	"SyncTimer/ui"
 	"embed"
 	"fmt"
+	"github.com/zwk-app/go-tools/logs"
+	"github.com/zwk-app/go-tools/tools"
 	"os/exec"
 	"strings"
 	"time"
@@ -48,5 +49,5 @@ func main() {
 	} else {
 		ui.MainApp()
 	}
-
+	tools.Fallback("", "fallback value")
 }

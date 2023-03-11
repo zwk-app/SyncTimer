@@ -1,12 +1,12 @@
 package config
 
 import (
-	"SyncTimer/tools"
 	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"fyne.io/fyne/v2"
+	"github.com/zwk-app/go-tools/tools"
 	"os"
 	"path"
 	"strings"

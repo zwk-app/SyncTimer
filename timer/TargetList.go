@@ -1,9 +1,9 @@
 package timer
 
 import (
-	"SyncTimer/logs"
 	"encoding/json"
 	"fmt"
+	"github.com/zwk-app/go-tools/logs"
 	"io"
 	"net/http"
 	"net/url"

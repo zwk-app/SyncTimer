@@ -1,9 +1,9 @@
 package audio
 
 import (
-	"SyncTimer/logs"
 	"SyncTimer/resources"
 	"fmt"
+	"github.com/zwk-app/go-tools/logs"
 	"path"
 	"strings"
 	"time"

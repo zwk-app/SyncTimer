@@ -1,10 +1,10 @@
 package audio
 
 import (
-	"SyncTimer/logs"
 	"bytes"
 	"github.com/hajimehoshi/go-mp3"
 	"github.com/hajimehoshi/oto/v2"
+	"github.com/zwk-app/go-tools/logs"
 	"os"
 	"time"
 )

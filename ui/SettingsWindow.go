@@ -3,7 +3,6 @@ package ui
 import (
 	"SyncTimer/audio"
 	"SyncTimer/config"
-	"SyncTimer/logs"
 	"SyncTimer/resources"
 	"SyncTimer/timer"
 	"fmt"
@@ -11,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/zwk-app/go-tools/logs"
 )
 
 var settingsWindowInitialized = false

@@ -2,9 +2,9 @@ package timer
 
 import (
 	"SyncTimer/config"
-	"SyncTimer/logs"
-	"SyncTimer/tools"
 	"fmt"
+	"github.com/zwk-app/go-tools/logs"
+	"github.com/zwk-app/go-tools/tools"
 	"strconv"
 	"time"
 )
@@ -268,11 +268,11 @@ func (t *TargetEngine) SetTargetString(value string) *TargetEngine {
 }
 
 func SetAlarmSound(value string) {
-	Engine().SetAlarmSound(tools.StringWithFallback(value, config.DefaultAlarmSound))
+	Engine().SetAlarmSound(tools.Fallback(value, config.DefaultAlarmSound))
 }
 
 func SetTextLabel(value string) {
-	Engine().SetTextLabel(tools.StringWithFallback(value, config.DefaultTextLabel))
+	Engine().SetTextLabel(tools.Fallback(value, config.DefaultTextLabel))
 }
 
 func SetTargetTime(timeString string, label string, alarm string) {

@@ -1,13 +1,13 @@
 package ui
 
 import (
-	"SyncTimer/logs"
 	"SyncTimer/timer"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/zwk-app/go-tools/logs"
 )
 
 var targetDelayWindowInitialized = false
