@@ -37,7 +37,7 @@ func TargetTimeWindowConfirmButtonOnClick() {
 	logs.Debug("TargetTimeWindow", "ConfirmButtonOnClick", nil)
 	s := targetTimeInput.Text
 	if TargetTimeInputValidator(s) == nil {
-		timer.SetTargetTime(s, "", "")
+		timer.SetTargetTimeString(s)
 		TargetTimeWindowOnClose()
 	}
 }

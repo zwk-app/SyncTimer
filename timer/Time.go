@@ -20,8 +20,6 @@ type Time struct {
 	}
 }
 
-//goland:noinspection ALL
-
 func NewTime() *Time {
 	return &Time{
 		location:     time.Local,

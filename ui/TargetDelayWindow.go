@@ -20,7 +20,7 @@ func TargetDelayWindowOnClose() {
 }
 
 func TargetDelayInputValidator(s string) error {
-	if !timer.CheckTimeString(s) {
+	if !timer.CheckDelayString(s) {
 		return fmt.Errorf("invalid")
 	}
 	return nil
@@ -37,7 +37,7 @@ func TargetDelayWindowConfirmButtonOnClick() {
 	logs.Debug("TargetDelayWindow", "ConfirmButtonOnClick", nil)
 	s := targetDelayInput.Text
 	if TargetDelayInputValidator(s) == nil {
-		timer.SetTargetDelay(s, "", "")
+		timer.SetTargetDelayString(s)
 		TargetDelayWindowOnClose()
 	}
 }

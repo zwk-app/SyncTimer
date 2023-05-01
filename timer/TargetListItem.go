@@ -7,27 +7,29 @@ import (
 type TargetListItem struct {
 	Object     *Time
 	timeString string
-	textLabel  string
-	alarmSound string
-	last       struct {
+	alarm      struct {
+		name  string
+		sound string
+	}
+	last struct {
 		error error
 	}
 }
 
-func NewTargetListItem(timeString string, textLabel string, alertSound string) *TargetListItem {
+func NewTargetListItem(timeString string, alarmName string, alarmSound string) *TargetListItem {
 	t := new(TargetListItem)
 	t.Object = NewTime().SetTimeString(timeString)
 	if t.last.error == nil {
 		t.timeString = t.Object.TimeString()
-		if len(textLabel) > 0 {
-			t.textLabel = textLabel
+		if len(alarmName) > 0 {
+			t.alarm.name = alarmName
 		} else {
-			t.textLabel = config.DefaultTextLabel
+			t.alarm.name = config.DefaultTextLabel
 		}
-		if len(alertSound) > 0 {
-			t.alarmSound = alertSound
+		if len(alarmSound) > 0 {
+			t.alarm.sound = alarmSound
 		} else {
-			t.alarmSound = config.DefaultAlarmSound
+			t.alarm.sound = config.DefaultAlarmSound
 		}
 	}
 	return t
@@ -48,10 +50,10 @@ func (t *TargetListItem) TimeString() string {
 	return t.timeString
 }
 
-func (t *TargetListItem) TextLabel() string {
-	return t.textLabel
+func (t *TargetListItem) AlarmName() string {
+	return t.alarm.name
 }
 
 func (t *TargetListItem) AlarmSound() string {
-	return t.alarmSound
+	return t.alarm.sound
 }

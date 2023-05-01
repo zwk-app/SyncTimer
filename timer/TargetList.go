@@ -60,7 +60,7 @@ func (t *TargetList) NextTargetListItem() *TargetListItem {
 func (t *TargetList) String() string {
 	s := ""
 	for i, r := range t.items {
-		s += fmt.Sprintf("[%02d] %6s %-16s %s\n", i+1, r.timeString, r.textLabel, r.alarmSound)
+		s += fmt.Sprintf("[%02d] %6s %-16s %s\n", i+1, r.timeString, r.alarm.name, r.alarm.sound)
 	}
 	return s
 }

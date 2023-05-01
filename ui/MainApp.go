@@ -33,11 +33,11 @@ func AlertLoop() {
 	logs.Debug("MainApp", "AlertLoop", nil)
 	time.Sleep(1500 * time.Millisecond)
 	go func() {
-		currentCheck := 0
-		lastCheck := 0
-		lastCheckDiff := 0
+		var currentCheck int64 = 0
+		var lastCheck int64 = 0
+		var lastCheckDiff int64 = 0
 		for {
-			currentCheck = timer.Engine().RemainingSeconds()
+			currentCheck = timer.RemainingSeconds()
 			lastCheckDiff = lastCheck - currentCheck
 			if lastCheck < currentCheck {
 				logs.Debug("MainApp", fmt.Sprintf("AlertLoop : %08d << %08d (%02d)", lastCheck, currentCheck, lastCheckDiff), nil)
@@ -48,7 +48,7 @@ func AlertLoop() {
 				currentCheck = lastCheck - 1
 			}
 			if currentCheck < lastCheck {
-				h, m, s := timer.Engine().RemainingTime()
+				h, m, s := timer.RemainingTime()
 				if currentCheck >= 0 {
 					if currentCheck < 11 {
 						if currentCheck == 0 {
