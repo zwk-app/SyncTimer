@@ -97,7 +97,7 @@ jobs:
           ./github.sh build-summary
       - name: Release
         if: "${{ inputs.newRelease }}"
-        uses: "actions/github-script@v6.4.0"
+        uses: "actions/github-script@v6.4.1"
         with:
           github-token: "${{ secrets.GIT_BOT_TOKEN }}"
           script: |
