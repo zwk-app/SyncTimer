@@ -10,7 +10,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/zwk-app/go-tools/logs"
+	"github.com/zwk-app/zwk-tools/logs"
 	"image/color"
 	"time"
 )

@@ -6,7 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"fyne.io/fyne/v2"
-	"github.com/zwk-app/go-tools/tools"
+	"github.com/zwk-app/zwk-tools/tools"
 	"os"
 	"path"
 	"strings"
