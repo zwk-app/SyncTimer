@@ -1,56 +1,58 @@
 package ui
 
 import (
-	"SyncTimer/tools"
+	"SyncTimer/audio"
+	"SyncTimer/config"
+	"SyncTimer/timer"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
-	"log"
+	"github.com/zwk-app/go-tools/logs"
 	"os"
 	"time"
 )
 
-var appEngine *tools.AppEngine
+var FyneApp fyne.App
+var FyneWindow fyne.Window
 
 func TextToSpeechAlert(name string) {
-	if appEngine.Alerts.TextToSpeech {
-		log.Printf("TextToSpeechAlert '%s'", name)
-		//goland:noinspection GoUnhandledErrorResult
-		go appEngine.Audio.Object.Play(name)
+	if config.Alerts().TextToSpeech {
+		logs.Debug("MainApp", fmt.Sprintf("TextToSpeechAlert '%s'", name), nil)
+		go audio.Play(name)
 	}
 }
 
 func NotificationAlert(message string) {
-	if appEngine.Alerts.Notifications {
-		log.Printf("NotificationAlert '%s'", message)
-		go appEngine.Fyne.App.SendNotification(fyne.NewNotification(appEngine.Title(), message))
+	if config.Alerts().Notifications {
+		logs.Debug("MainApp", fmt.Sprintf("NotificationAlert '%s'", message), nil)
+		go FyneApp.SendNotification(fyne.NewNotification(config.Title(), message))
 	}
 }
 
 func AlertLoop() {
-	log.Println("AlertLoop : Start")
+	logs.Debug("MainApp", "AlertLoop", nil)
 	time.Sleep(1500 * time.Millisecond)
 	go func() {
-		currentCheck := 0
-		lastCheck := 0
-		lastCheckDiff := 0
+		var currentCheck int64 = 0
+		var lastCheck int64 = 0
+		var lastCheckDiff int64 = 0
 		for {
-			currentCheck = appEngine.Timer.Object.GetRemainingSeconds()
+			currentCheck = timer.RemainingSeconds()
 			lastCheckDiff = lastCheck - currentCheck
 			if lastCheck < currentCheck {
-				log.Printf("AlertLoop : %08d << %08d (%02d)", lastCheck, currentCheck, lastCheckDiff)
+				logs.Debug("MainApp", fmt.Sprintf("AlertLoop : %08d << %08d (%02d)", lastCheck, currentCheck, lastCheckDiff), nil)
 				lastCheck = currentCheck + 1
 			}
 			if (lastCheckDiff > 1) && (lastCheckDiff < 5) {
-				log.Printf("AlertLoop : %08d <> %08d (%02d)", lastCheck, currentCheck, lastCheckDiff)
+				logs.Debug("MainApp", fmt.Sprintf("AlertLoop : %08d <> %08d (%02d)", lastCheck, currentCheck, lastCheckDiff), nil)
 				currentCheck = lastCheck - 1
 			}
 			if currentCheck < lastCheck {
-				h, m, s := appEngine.Timer.Object.GetRemainingTime()
+				h, m, s := timer.RemainingTime()
 				if currentCheck >= 0 {
 					if currentCheck < 11 {
 						if currentCheck == 0 {
-							TextToSpeechAlert(appEngine.Alerts.AlertSound)
+							TextToSpeechAlert(config.Alerts().AlarmSound)
 						} else if currentCheck%2 == 0 {
 							// every 2 sec if T <= 10s
 							TextToSpeechAlert(fmt.Sprintf("target-%02d-seconds", s))
@@ -98,22 +100,16 @@ func AlertLoop() {
 	}()
 }
 
-func MainApp(a *tools.AppEngine) {
-	appEngine = a
+func MainApp() {
 	e := os.Setenv("FYNE_THEME", "dark")
 	if e != nil {
-		log.Println("Setenv error?")
+		logs.CriticalExit("", "", e)
 	}
-	appEngine.Fyne.App = app.NewWithID(appEngine.Name())
-	_ = appEngine.LoadFyneSettings()
-
-	if !appEngine.Timer.EnforceTarget {
-		appEngine.Timer.Object.Next()
-	}
+	FyneApp = app.NewWithID(config.Name())
+	config.LoadFyneSettings(FyneApp)
 	AlertLoop()
-
-	appEngine.Fyne.MainWindow = appEngine.Fyne.App.NewWindow(appEngine.Title())
-	appEngine.Fyne.MainWindow.Resize(fyne.NewSize(320, 540))
+	FyneWindow = FyneApp.NewWindow(config.Title())
+	FyneWindow.Resize(fyne.NewSize(320, 540))
 	ShowMainWindow()
-	appEngine.Fyne.App.Run()
+	FyneApp.Run()
 }

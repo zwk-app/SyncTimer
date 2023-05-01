@@ -5,148 +5,74 @@ import (
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"log"
-	"strconv"
+	"github.com/zwk-app/go-tools/logs"
 )
 
-var targetWindowInitialized = false
-var targetWindowContainer *fyne.Container
-var targetInput *TargetEntry
+var targetTimeWindowInitialized = false
+var targetTimeWindowContainer *fyne.Container
+var targetTimeInput *NumbersEntry
 
-type TargetEntry struct {
-	widget.Entry
-}
-
-func NewTargetEntry() *TargetEntry {
-	targetEntry := &TargetEntry{}
-	targetEntry.ExtendBaseWidget(targetEntry)
-	return targetEntry
-}
-
-func (i *TargetEntry) TypedRune(r rune) {
-	if r >= '0' && r <= '9' {
-		i.Entry.TypedRune(r)
-	}
-}
-
-func (i *TargetEntry) TypedShortcut(shortcut fyne.Shortcut) {
-	paste, ok := shortcut.(*fyne.ShortcutPaste)
-	if !ok {
-		i.Entry.TypedShortcut(shortcut)
-		return
-	}
-	content := paste.Clipboard.Content()
-	if _, err := strconv.ParseFloat(content, 64); err == nil {
-		i.Entry.TypedShortcut(shortcut)
-	}
-}
-
-func (i *TargetEntry) Keyboard() mobile.KeyboardType {
-	return mobile.NumberKeyboard
-}
-
-func TargetInputOnChange(s string) {
-	valid := timer.CheckTimeString(s)
-	sLen := len(s)
-	switch sLen {
-	case 1, 2, 4, 6:
-		if !valid {
-			targetInput.SetText(s[:len(s)-1])
-		}
-	default:
-		if sLen > 6 {
-			targetInput.SetText(s[0:6])
-		}
-	}
-}
-
-func TargetWindowOnClose() {
-	log.Printf("TargetWindowOnClose")
-	appEngine.Fyne.MainWindow.Canvas().SetOnTypedKey(nil)
+func TargetTimeWindowOnClose() {
+	logs.Debug("TargetTimeWindow", "OnClose", nil)
 	ShowMainWindow()
 }
 
-func TargetConfirmButtonOnClick() {
-	log.Printf("TargetConfirmButtonOnClick")
-	valid := appEngine.Timer.Object.SetTargetString(targetInput.Text)
-	if !valid {
-		log.Printf("TargetConfirmButtonOnClick invalid: '%s'", targetInput.Text)
+func TargetTimeInputValidator(s string) error {
+	if !timer.CheckTimeString(s) {
+		return fmt.Errorf("invalid")
 	}
-	TargetWindowOnClose()
+	return nil
 }
 
-func TargetInputAppend(i int) {
-	targetInput.SetText(fmt.Sprintf("%s%d", targetInput.Text, i))
-}
-
-func TargetInputBackspace() {
-	targetInput.SetText(targetInput.Text[:len(targetInput.Text)-1])
-}
-
-func TargetWindowOnKeyEvent(k *fyne.KeyEvent) {
-	log.Printf("TargetWindowOnKeyEvent: '%s'", k.Name)
-	switch k.Name {
-	case fyne.KeyEscape:
-		TargetWindowOnClose()
-	case fyne.KeyReturn, fyne.KeyEnter:
-		TargetConfirmButtonOnClick()
-	case fyne.Key0:
-		TargetInputAppend(0)
-	case fyne.Key1:
-		TargetInputAppend(1)
-	case fyne.Key2:
-		TargetInputAppend(2)
-	case fyne.Key3:
-		TargetInputAppend(3)
-	case fyne.Key4:
-		TargetInputAppend(4)
-	case fyne.Key5:
-		TargetInputAppend(5)
-	case fyne.Key6:
-		TargetInputAppend(6)
-	case fyne.Key7:
-		TargetInputAppend(7)
-	case fyne.Key8:
-		TargetInputAppend(8)
-	case fyne.Key9:
-		TargetInputAppend(9)
-	case fyne.KeyBackspace:
-		TargetInputBackspace()
+func TargetTimeInputOnSubmitted(s string) {
+	logs.Debug("TargetTimeWindow", fmt.Sprintf("InputOnSubmitted: '%s'", s), nil)
+	if TargetTimeInputValidator(s) == nil {
+		TargetTimeWindowConfirmButtonOnClick()
 	}
-
 }
 
-func TargetWindowContent() *fyne.Container {
-	log.Printf("TargetWindowContent")
+func TargetTimeWindowConfirmButtonOnClick() {
+	logs.Debug("TargetTimeWindow", "ConfirmButtonOnClick", nil)
+	s := targetTimeInput.Text
+	if TargetTimeInputValidator(s) == nil {
+		timer.SetTargetTimeString(s)
+		TargetTimeWindowOnClose()
+	}
+}
 
-	if !targetWindowInitialized {
+func TargetTimeWindowContent() *fyne.Container {
+	logs.Debug("TargetTimeWindow", "Content", nil)
+
+	if !targetTimeWindowInitialized {
 
 		/* Middle content */
-		targetInput = NewTargetEntry()
-		targetInput.OnChanged = TargetInputOnChange
-		targetInput.SetPlaceHolder("hh[mm[ss]]")
-		targetContainer := container.NewCenter(targetInput)
+		targetTimeInput = NewNumbersEntry()
+		targetTimeInput.Validator = TargetTimeInputValidator
+		targetTimeInput.OnSubmitted = TargetTimeInputOnSubmitted
+		targetTimeInput.SetPlaceHolder("[[hh]mm]ss")
+		targetTimeInput.TextStyle.Bold = true
+		targetTimeInput.TextStyle.Monospace = true
+		targetTimeContainer := container.NewCenter(targetTimeInput)
 
 		/* Bottom buttons */
-		targetCancelButton := widget.NewButton("Cancel", TargetWindowOnClose)
-		targetCancelButton.SetIcon(theme.CancelIcon())
-		targetConfirmButton := widget.NewButton("Confirm", TargetConfirmButtonOnClick)
-		targetConfirmButton.SetIcon(theme.ConfirmIcon())
-		bottomContainer := container.NewGridWithRows(1, targetCancelButton, targetConfirmButton)
+		targetTimeCancelButton := widget.NewButton("Cancel", TargetTimeWindowOnClose)
+		targetTimeCancelButton.SetIcon(theme.CancelIcon())
+		targetTimeConfirmButton := widget.NewButton("Confirm", TargetTimeWindowConfirmButtonOnClick)
+		targetTimeConfirmButton.SetIcon(theme.ConfirmIcon())
+		bottomContainer := container.NewGridWithRows(1, targetTimeCancelButton, targetTimeConfirmButton)
 
-		targetWindowContainer = container.NewBorder(nil, bottomContainer, nil, nil, targetContainer)
+		targetTimeWindowContainer = container.NewBorder(nil, bottomContainer, nil, nil, targetTimeContainer)
 
-		targetWindowInitialized = true
+		targetTimeWindowInitialized = true
 	}
-	return targetWindowContainer
+	return targetTimeWindowContainer
 }
-func ShowTargetWindow() {
-	log.Printf("ShowTargetWindow")
-	appEngine.Fyne.MainWindow.SetContent(TargetWindowContent())
-	targetInput.SetText("")
-	appEngine.Fyne.MainWindow.Show()
-	appEngine.Fyne.MainWindow.Canvas().SetOnTypedKey(TargetWindowOnKeyEvent)
+func ShowTargetTimeWindow() {
+	logs.Debug("TargetTimeWindow", "Show", nil)
+	FyneWindow.SetContent(TargetTimeWindowContent())
+	targetTimeInput.SetText("")
+	FyneWindow.Show()
+	FyneWindow.Canvas().Focus(targetTimeInput)
 }

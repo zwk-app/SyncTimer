@@ -1,5 +1,5 @@
 #file: noinspection SpellCheckingInspection,SpellCheckingInspection,SpellCheckingInspection,SpellCheckingInspection,SpellCheckingInspection,SpellCheckingInspection,SpellCheckingInspection,SpellCheckingInspection,SpellCheckingInspection,SpellCheckingInspection,SpellCheckingInspection,SpellCheckingInspection,SpellCheckingInspection
-name: Build & Release
+name: Build
 
 on:
   workflow_dispatch:
@@ -50,7 +50,7 @@ jobs:
       - name: Build Increment
         run: |
           chmod +x github.sh
-          ./github.sh SetNextBuildNumber
+          ./github.sh build-increment
       - name: Commit & Push
         run: |
           git commit -a -m "Continuous Integration"
@@ -74,44 +74,27 @@ jobs:
           key: ${{ runner.os }}-golang
           restore-keys: |
             ${{ runner.os }}-golang
-      - name: Update & Upgrade
+      - name: Requirements
         run: |
-          sudo apt-get update
-      - name: Fyne Framework
-        run: |
-          sudo apt-get install golang gcc libgl1-mesa-dev xorg-dev
-          sudo apt-get install gcc-mingw-w64-x86-64
-          go get fyne.io/fyne/v2
-          go get github.com/fyne-io/fyne-cross@latest
-          go install fyne.io/fyne/v2/cmd/fyne@latest
-      - name: Text To Speech
-        run: |
-          sudo apt-get install libasound2-dev
-          go get github.com/hajimehoshi/go-mp3
-          go get github.com/hajimehoshi/oto/v2
-      - name: Go Tidy
-        run: |
-          go mod tidy
+          chmod +x github.sh
+          ./github.sh build-requirements
+          ./github.sh github-environment
       - name: Linux
         run: |
-          fyne package -os linux -icon ./res/SyncTimer.icon.png
+          chmod +x github.sh
+          ./github.sh package linux
       - name: Android
         run: |
-          export CGO_ENABLED=1
-          export GOOS=android
-          fyne package -os android -appID app.zwk.synctimer -icon ./res/SyncTimer.icon.png
+          chmod +x github.sh
+          ./github.sh package android
       - name: Windows
         run: |
-          export CC=/usr/bin/x86_64-w64-mingw32-gcc-win32
-          export CGO_LDFLAGS="-static-libgcc -static"
-          export CGO_ENABLED=1
-          export GOOS=windows
-          fyne package -os windows -icon ./res/SyncTimer.icon.png
+          chmod +x github.sh
+          ./github.sh package windows
       - name: Summary
         run: |
           chmod +x github.sh
-          ./github.sh BuildSummary
-          ./github.sh SetReleaseEnv
+          ./github.sh build-summary
       - name: Release
         if: "${{ inputs.newRelease }}"
         uses: "actions/github-script@v6.4.0"

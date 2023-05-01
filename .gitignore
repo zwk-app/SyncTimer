@@ -1,3 +1,6 @@
+android-ndk-*
+/build/
+/out/
 backup
 SyncTimer.*
 *.exe

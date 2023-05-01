@@ -2,65 +2,77 @@ package audio
 
 import (
 	"fmt"
+	"github.com/zwk-app/go-tools/logs"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
 )
 
-type TextToSpeech struct {
+//goland:noinspection GoNameStartsWithPackageName
+type AudioTextToSpeech struct {
 	language string
 }
 
-func NewTextToSpeech(language string) *TextToSpeech {
-	t := TextToSpeech{}
-	t.SetLanguage(language)
-	return &t
+var textToSpeech *AudioTextToSpeech
+
+func TextToSpeech() *AudioTextToSpeech {
+	if textToSpeech == nil {
+		textToSpeech = &AudioTextToSpeech{}
+		textToSpeech.language = "en"
+	}
+	return textToSpeech
 }
 
-func (t *TextToSpeech) SetLanguage(language string) *TextToSpeech {
+func SetLanguage(language string) {
 	switch language {
 	case "en":
-		t.language = "en"
+		TextToSpeech().language = "en"
 	default:
-		t.language = "en"
+		TextToSpeech().language = "en"
 	}
-	return t
 }
 
-func (t *TextToSpeech) CreateFile(filename string, message string) error {
-	log.Printf("TextToSpeech->CreateFile '%s'", filename)
+func CreateFile(filename string, message string) {
+	logs.Debug("AudioTextToSpeech", fmt.Sprintf("CreateFile: '%s' in '%s'", message, filename), nil)
 	audioFile, e := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0644)
 	if e != nil {
-		return e
+		logs.Error("AudioTextToSpeech", "", e)
+		SetError(e)
+		return
 	}
-	ttsUrl := fmt.Sprintf("https://translate.google.com/translate_tts?ie=UTF-8&total=1&idx=0&textlen=32&client=tw-ob&q=%s&tl=%s", url.QueryEscape(message), t.language)
+	ttsUrl := fmt.Sprintf("https://translate.google.com/translate_tts?ie=UTF-8&total=1&idx=0&textlen=32&client=tw-ob&q=%s&tl=%s", url.QueryEscape(message), TextToSpeech().language)
 	httpResponse, e := http.Get(ttsUrl)
 	if e != nil {
 		_ = audioFile.Close()
-		return e
+		logs.Error("AudioTextToSpeech", "", e)
+		SetError(e)
+		return
 	}
 	_, e = io.Copy(audioFile, httpResponse.Body)
 	_ = httpResponse.Body.Close()
 	_ = audioFile.Close()
 	if e != nil {
-		return e
+		logs.Error("AudioTextToSpeech", "", e)
+		SetError(e)
 	}
-	return nil
 }
 
-func (t *TextToSpeech) CreateTemp(message string) (string, error) {
+func CreateTemp(message string) string {
+	logs.Debug("AudioTextToSpeech", fmt.Sprintf("CreateTemp: '%s'", message), nil)
 	tempFile, e := os.CreateTemp(os.TempDir(), "*.mp3")
 	if e != nil {
-		return "", e
+		SetError(e)
+		logs.Error("AudioTextToSpeech", "", e)
+		return ""
 	}
 	tempFileName := tempFile.Name()
 	_ = tempFile.Close()
-	e = t.CreateFile(tempFileName, message)
-	if e != nil {
+	CreateFile(tempFileName, message)
+	if HasError() {
 		_ = os.Remove(tempFileName)
-		return "", e
+		logs.Error("AudioTextToSpeech", "", Engine().last.error)
+		return ""
 	}
-	return tempFileName, nil
+	return tempFileName
 }
