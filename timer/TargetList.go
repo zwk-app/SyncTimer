@@ -3,7 +3,7 @@ package timer
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/zwk-app/go-tools/logs"
+	"github.com/zwk-app/zwk-tools/logs"
 	"io"
 	"net/http"
 	"net/url"

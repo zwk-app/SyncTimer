@@ -6,7 +6,7 @@ require (
 	fyne.io/fyne/v2 v2.3.1
 	github.com/hajimehoshi/go-mp3 v0.3.4
 	github.com/hajimehoshi/oto/v2 v2.3.1
-	github.com/zwk-app/go-tools v0.0.0
+	github.com/zwk-app/zwk-tools v0.0.0-20230501174604-d4c1281ade9f
 )
 
 require (

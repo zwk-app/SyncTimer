@@ -3,7 +3,7 @@ package resources
 import (
 	"embed"
 	"fmt"
-	"github.com/zwk-app/go-tools/logs"
+	"github.com/zwk-app/zwk-tools/logs"
 	"strings"
 )
 

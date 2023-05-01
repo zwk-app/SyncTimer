@@ -3,7 +3,7 @@ package audio
 import (
 	"SyncTimer/resources"
 	"fmt"
-	"github.com/zwk-app/go-tools/logs"
+	"github.com/zwk-app/zwk-tools/logs"
 	"path"
 	"strings"
 	"time"
