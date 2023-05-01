@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"SyncTimer/config"
 	"SyncTimer/timer"
 	"fmt"
 	"fyne.io/fyne/v2"
@@ -37,6 +38,8 @@ func TargetTimeWindowConfirmButtonOnClick() {
 	logs.Debug("TargetTimeWindow", "ConfirmButtonOnClick", nil)
 	s := targetTimeInput.Text
 	if TargetTimeInputValidator(s) == nil {
+		timer.SetAlarmName(config.DefaultTextLabel)
+		timer.SetAlarmSound(config.Alerts().AlarmSound)
 		timer.SetTargetTimeString(s)
 		TargetTimeWindowOnClose()
 	}
