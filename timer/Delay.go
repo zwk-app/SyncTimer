@@ -11,7 +11,7 @@ func CheckDelay(h int, m int, s int) bool {
 
 //goland:noinspection GoUnusedExportedFunction
 func CheckDelayString(delayString string) bool {
-	h, m, s, e := TimeFromString(delayString)
+	h, m, s, e := DelayFromString(delayString)
 	if e != nil {
 		return false
 	}

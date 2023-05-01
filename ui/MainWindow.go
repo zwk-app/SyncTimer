@@ -87,6 +87,7 @@ func MainWindowLoop() {
 			currentText.TextSize = 36 * r
 			remainingText.TextSize = 36 * r
 
+			targetLabel.Text = timer.AlarmName()
 			targetText.Text = timer.TargetTimeText()
 			currentText.Text = timer.CurrentTimeText()
 			remainingText.Text = timer.RemainingTimeText()
