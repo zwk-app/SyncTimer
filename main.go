@@ -39,8 +39,16 @@ func main() {
 	config.LoadEnvironment()
 	_ = config.LoadFile("")
 	config.LoadArguments()
+	if config.Logs().Verbose {
+		logs.SetLevelDebug()
+	} else {
+		logs.SetLevelInfo()
+	}
+	if len(config.Logs().FileName) > 0 {
+		logs.SetFileName(config.Logs().FileName)
+	}
 	if currentConfig, e := config.ToJson(); e == nil {
-		logs.Debug("Main", fmt.Sprintf("CurrentConfig: %s", currentConfig), nil)
+		logs.Info("Main", fmt.Sprintf("CurrentConfig: %s", currentConfig), nil)
 	}
 	timer.SetTargetJson(config.Target().JsonName)
 	timer.NextTarget()

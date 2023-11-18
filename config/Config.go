@@ -38,6 +38,7 @@ type AppConfig struct {
 type LogsConfig struct {
 	StdOut   bool   `json:"stdout"`
 	FileName string `json:"filename"`
+	Verbose  bool   `json:"verbose"`
 }
 
 type ProxyConfig struct {
@@ -172,6 +173,7 @@ func LoadArguments() {
 	r := Config()
 	flag.BoolVar(&r.Logs.StdOut, "stdout", r.Logs.StdOut, "Display app.logs in Stdout")
 	flag.StringVar(&r.Logs.FileName, "log", r.Logs.FileName, "Save app.logs in file")
+	flag.BoolVar(&r.Logs.Verbose, "verbose", r.Logs.Verbose, "Verbose mode")
 	flag.StringVar(&r.Audio.LocalPath, "audio-path", r.Audio.LocalPath, "enforce audio local path")
 	flag.BoolVar(&r.Audio.Make, "audio-make", r.Audio.Make, "generate all TTS audio files")
 	flag.StringVar(&r.Target.JsonName, "targets-json", r.Target.JsonName, "set targets Json list URL or filename")
