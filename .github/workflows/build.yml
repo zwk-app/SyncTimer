@@ -35,27 +35,6 @@ concurrency:
 
 jobs:
 
-  version:
-    runs-on: ubuntu-latest
-    steps:
-      - name: CheckOut
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GIT_BOT_TOKEN }}
-      - name: Git Setup
-        run: |
-          git config --global user.name "${{ vars.GIT_BOT_USER }}"
-          git config --global user.email "${{ vars.GIT_BOT_EMAIL }}"
-      - name: Build Increment
-        run: |
-          chmod +x github.sh
-          ./github.sh build-increment
-      - name: Commit & Push
-        run: |
-          git commit -a -m "Continuous Integration"
-          git push --force
-
   build:
     runs-on: ubuntu-latest
     steps:
@@ -127,3 +106,24 @@ jobs:
           path: |
             SyncTimer.*
           retention-days: 3
+
+  build-increment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: CheckOut
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GIT_BOT_TOKEN }}
+      - name: Git Setup
+        run: |
+          git config --global user.name "${{ vars.GIT_BOT_USER }}"
+          git config --global user.email "${{ vars.GIT_BOT_EMAIL }}"
+      - name: Build Increment
+        run: |
+          chmod +x github.sh
+          ./github.sh build-increment
+      - name: Commit & Push
+        run: |
+          git commit -a -m "Continuous Integration"
+          git push --force
