@@ -19,6 +19,9 @@ sudo apt-get install libasound2-dev
 ```
 # Windows
 ##### C compiler
+
+_Based on Fyne "Get Started" documentation: https://developer.fyne.io/started/_
+
 Download and install https://www.msys2.org/
 
 Start `MSYS2 MinGW 64-bit` from the start menu and run:
@@ -26,8 +29,13 @@ Start `MSYS2 MinGW 64-bit` from the start menu and run:
 ```bash
 pacman -Syu
 pacman -S git mingw-w64-x86_64-toolchain
-echo "export PATH=\$PATH:/d/Apps/Dev/Go/go1.19.5/bin:~/Go/bin" >> ~/.bashrc
+GO_BIN_PATH=d/Projects/SDK/go1.21.4/bin
+echo -e "export PATH=\$PATH:${GO_BIN_PATH}:~/Go/bin" >> ~/.bashrc
 ```
+
+For the compiler to work you will need to set up the windows %PATH% variable to find these tools.
+Add “C:\msys64\mingw64\bin” to the Path list.
+
 # Dependancies
 ### Fyne Module
 ```bash
@@ -40,6 +48,8 @@ go get github.com/hajimehoshi/oto/v2
 ```
 ### Get other requirements & cleanup
 ```bash
+go get -u
+go clean -modcache
 go mod tidy
 ```
 # Packaging
