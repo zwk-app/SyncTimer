@@ -17,6 +17,10 @@ func NewNumbersEntry() *NumbersEntry {
 	return numbersEntry
 }
 
+func (t *NumbersEntry) MinSize() fyne.Size {
+	return fyne.NewSize(128, 36)
+}
+
 func (t *NumbersEntry) TypedRune(r rune) {
 	if r >= '0' && r <= '9' {
 		t.Entry.TypedRune(r)
