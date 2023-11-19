@@ -103,7 +103,7 @@ func VersionWithBuild() string {
 
 }
 func Title() string {
-	return fmt.Sprintf("%s v%s", Name(), Version())
+	return fmt.Sprintf("%s v%s", Name(), VersionWithBuild())
 }
 
 func Logs() *LogsConfig {

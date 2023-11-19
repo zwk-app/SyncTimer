@@ -47,7 +47,7 @@ func main() {
 	if len(config.Logs().FileName) > 0 {
 		logs.SetFileName(config.Logs().FileName)
 	}
-	logs.Info("Main", fmt.Sprintf("CurrentConfig: %s", config.ToString()), nil)
+	logs.Info("Main", fmt.Sprintf("CurrentConfig\n%s", config.ToString()), nil)
 	timer.SetTargetJson(config.Target().JsonName)
 	timer.NextTarget()
 	if config.Config().Audio.Make {
