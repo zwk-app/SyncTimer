@@ -109,7 +109,7 @@ func MainApp() {
 	config.LoadFyneSettings(FyneApp)
 	AlertLoop()
 	FyneWindow = FyneApp.NewWindow(config.Title())
-	FyneWindow.Resize(fyne.NewSize(320, 540))
+	FyneWindow.Resize(fyne.NewSize(320, 460))
 	ShowMainWindow()
 	FyneApp.Run()
 }

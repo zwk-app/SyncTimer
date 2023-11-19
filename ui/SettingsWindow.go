@@ -97,6 +97,6 @@ func ShowSettingsWindow() {
 	FyneWindow.SetContent(SettingsWindowContent())
 	settingsVoiceAlertsCheck.SetChecked(config.Alerts().TextToSpeech)
 	settingsNotificationsCheck.SetChecked(config.Alerts().Notifications)
-	settingsAlertSoundSelect.SetSelected(config.Alerts().AlarmSound)
+	settingsAlertSoundSelect.SetSelected(resources.AlarmSoundTitle(config.Alerts().AlarmSound))
 	FyneWindow.Show()
 }

@@ -47,9 +47,7 @@ func main() {
 	if len(config.Logs().FileName) > 0 {
 		logs.SetFileName(config.Logs().FileName)
 	}
-	if currentConfig, e := config.ToJson(); e == nil {
-		logs.Info("Main", fmt.Sprintf("CurrentConfig: %s", currentConfig), nil)
-	}
+	logs.Info("Main", fmt.Sprintf("CurrentConfig: %s", config.ToString()), nil)
 	timer.SetTargetJson(config.Target().JsonName)
 	timer.NextTarget()
 	if config.Config().Audio.Make {
@@ -57,5 +55,5 @@ func main() {
 	} else {
 		ui.MainApp()
 	}
-	tools.Fallback("", "fallback value")
+	tools.StringFallback("", "fallback value")
 }

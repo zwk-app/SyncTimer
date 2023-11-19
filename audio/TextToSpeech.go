@@ -24,6 +24,7 @@ func TextToSpeech() *AudioTextToSpeech {
 	return textToSpeech
 }
 
+//goland:noinspection GoUnusedExportedFunction
 func SetLanguage(language string) {
 	switch language {
 	case "en":
@@ -58,6 +59,7 @@ func CreateFile(filename string, message string) {
 	}
 }
 
+//goland:noinspection GoUnusedExportedFunction
 func CreateTemp(message string) string {
 	logs.Debug("AudioTextToSpeech", fmt.Sprintf("CreateTemp: '%s'", message), nil)
 	tempFile, e := os.CreateTemp(os.TempDir(), "*.mp3")

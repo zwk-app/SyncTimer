@@ -81,6 +81,15 @@ func AlarmSoundTitles() []string {
 	}
 }
 
+func AlarmSoundTitle(alarmSoundName string) string {
+	for i, v := range AlarmSoundNames() {
+		if v == alarmSoundName {
+			return AlarmSoundTitles()[i]
+		}
+	}
+	return ""
+}
+
 func AlarmSoundName(alarmSoundTitle string) string {
 	for i, v := range AlarmSoundTitles() {
 		if v == alarmSoundTitle {

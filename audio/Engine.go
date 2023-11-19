@@ -37,6 +37,7 @@ func HasError() bool {
 	return Engine().last.error != nil
 }
 
+//goland:noinspection GoUnusedExportedFunction
 func GetError() error {
 	lastError := Engine().last.error
 	SetError(nil)
