@@ -78,7 +78,7 @@ jobs:
               console.log(`Release Id   : '${process.env.RELEASE_ID}'`);
               console.log(`Release URL  : '${process.env.RELEASE_UPLOAD_URL}'`);
             } catch (error) {
-              core.setFailed(`Create Release: $(error.message)`);
+              core.setFailed(`Create Release: ${error.message}`);
               return;
             }
             try {
@@ -89,7 +89,7 @@ jobs:
               });
               console.log(`Release Id   : '${release.data.id}'`);
             } catch (error) {
-              core.setFailed(`Get Release: $(error.message)`);
+              core.setFailed(`Get Release: ${error.message}`);
               return;
             }
             try {
@@ -101,7 +101,7 @@ jobs:
                 data: await fs.readFileSync("version.go")
               });
             } catch (error) {
-              core.setFailed(`version.go: $(error.message)`);
+              core.setFailed(`version.go: ${error.message}`);
               return;
             }
       - name: "Build Summary Upload"
