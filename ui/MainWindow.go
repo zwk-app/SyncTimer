@@ -15,6 +15,9 @@ import (
 	"time"
 )
 
+const textBaseSize float32 = 22
+const textBaseRatio float32 = 2.2
+
 var mainWindowInitialized = false
 var mainWindowContainer *fyne.Container
 var mainToolbarMenu *widget.Toolbar
@@ -75,30 +78,33 @@ func MainWindowLoop() {
 			//goland:noinspection GoRedundantConversion
 			r := float32(cw) / float32(320)
 
-			targetLabel.TextSize = 16 * r
-			currentLabel.TextSize = 16 * r
-			remainingLabel.TextSize = 16 * r
+			targetText.TextSize = textBaseSize * textBaseRatio * r
+			currentText.TextSize = targetText.TextSize
+			remainingText.TextSize = targetText.TextSize
 
-			targetLabel.Refresh()
-			currentLabel.Refresh()
-			remainingLabel.Refresh()
-
-			targetText.TextSize = 36 * r
-			currentText.TextSize = 36 * r
-			remainingText.TextSize = 36 * r
-
-			targetLabel.Text = timer.AlarmName()
 			targetText.Text = timer.TargetTimeText()
 			currentText.Text = timer.CurrentTimeText()
 			remainingText.Text = timer.RemainingTimeText()
 
-			if timer.RemainingSeconds() < -30 {
-				timer.NextTarget()
-			}
-
 			targetText.Refresh()
 			currentText.Refresh()
 			remainingText.Refresh()
+
+			targetLabel.TextSize = textBaseSize * r
+			currentLabel.TextSize = targetLabel.TextSize
+			remainingLabel.TextSize = targetLabel.TextSize
+			locationText.TextSize = targetLabel.TextSize
+
+			targetLabel.Text = timer.AlarmName()
+
+			targetLabel.Refresh()
+			currentLabel.Refresh()
+			remainingLabel.Refresh()
+			locationText.Refresh()
+
+			if timer.RemainingSeconds() < -30 {
+				timer.NextTarget()
+			}
 
 			time.Sleep(250 * time.Millisecond)
 		}
@@ -130,45 +136,46 @@ func MainWindowContent() *fyne.Container {
 		/* Current Time */
 		currentLabel = canvas.NewText("Current", currentColor)
 		currentLabel.Alignment = fyne.TextAlignCenter
-		currentLabel.TextSize = 16
+		currentLabel.TextSize = textBaseSize
 		currentLabel.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
 		currentText = canvas.NewText(timer.CurrentTimeText(), currentColor)
 		currentText.Alignment = fyne.TextAlignCenter
-		currentText.TextSize = 36
+		currentText.TextSize = textBaseSize * textBaseRatio
 		currentText.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
-		currentGrid := container.NewGridWithColumns(1, currentLabel, currentText)
+		//currentGrid := container.NewGridWithColumns(1, currentLabel, currentText)
 
 		/* Target Time */
 		targetLabel = canvas.NewText(timer.AlarmName(), targetColor)
-		targetLabel.Alignment = fyne.TextAlignCenter
-		targetLabel.TextSize = 16
-		targetLabel.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
+		targetLabel.Alignment = currentLabel.Alignment
+		targetLabel.TextSize = currentLabel.TextSize
+		targetLabel.TextStyle = currentLabel.TextStyle
 		targetText = canvas.NewText(timer.TargetTimeText(), targetColor)
-		targetText.Alignment = fyne.TextAlignCenter
-		targetText.TextSize = 36
-		targetText.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
-		targetGrid := container.NewGridWithColumns(1, targetLabel, targetText)
+		targetText.Alignment = currentText.Alignment
+		targetText.TextSize = currentText.TextSize
+		targetText.TextStyle = currentText.TextStyle
+		//targetGrid := container.NewGridWithColumns(1, targetLabel, targetText)
 
 		/* Remaining Time */
 		remainingLabel = canvas.NewText("Remaining", remainingColor)
-		remainingLabel.Alignment = fyne.TextAlignCenter
-		remainingLabel.TextSize = 16
-		remainingLabel.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
+		remainingLabel.Alignment = currentLabel.Alignment
+		remainingLabel.TextSize = currentLabel.TextSize
+		remainingLabel.TextStyle = currentLabel.TextStyle
 		remainingText = canvas.NewText(timer.RemainingTimeText(), remainingColor)
-		remainingText.Alignment = fyne.TextAlignCenter
-		remainingText.TextSize = 36
-		remainingText.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
-		remainingGrid := container.NewGridWithColumns(1, remainingLabel, remainingText)
+		remainingText.Alignment = currentText.Alignment
+		remainingText.TextSize = currentText.TextSize
+		remainingText.TextStyle = currentText.TextStyle
+		//remainingGrid := container.NewGridWithColumns(1, remainingLabel, remainingText)
 
 		/* Current Location (UTC/Local) */
 		locationText = canvas.NewText(timer.LocationName(), locationColor)
-		locationText.Alignment = fyne.TextAlignCenter
-		locationText.TextSize = 16
-		locationText.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
-		locationGrid := container.NewGridWithColumns(1, locationText)
+		locationText.Alignment = currentLabel.Alignment
+		locationText.TextSize = currentLabel.TextSize
+		locationText.TextStyle = currentLabel.TextStyle
+		//locationGrid := container.NewGridWithColumns(1, locationText)
 
 		/* Middle content */
-		middleGrid := container.NewGridWithColumns(1, currentGrid, targetGrid, remainingGrid, locationGrid)
+		//middleGrid := container.NewGridWithColumns(1, currentGrid, targetGrid, remainingGrid, locationGrid)
+		middleGrid := container.NewGridWithColumns(1, currentLabel, currentText, targetLabel, targetText, remainingLabel, remainingText, locationText)
 		middleContainer := container.NewCenter(middleGrid)
 
 		/* Bottom buttons */
