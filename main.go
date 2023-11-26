@@ -4,12 +4,10 @@ import (
 	"SyncTimer/audio"
 	"SyncTimer/config"
 	"SyncTimer/resources"
-	"SyncTimer/timer"
 	"SyncTimer/ui"
 	"embed"
 	"fmt"
 	"github.com/zwk-app/zwk-tools/logs"
-	"github.com/zwk-app/zwk-tools/tools"
 	"os/exec"
 	"strings"
 	"time"
@@ -48,12 +46,9 @@ func main() {
 		logs.SetFileName(config.Logs().FileName)
 	}
 	logs.Info("Main", fmt.Sprintf("CurrentConfig\n%s", config.ToString()), nil)
-	timer.SetTargetJson(config.Target().JsonName)
-	timer.NextTarget()
 	if config.Config().Audio.Make {
 		audio.GenerateAll(config.Name())
 	} else {
 		ui.MainApp()
 	}
-	tools.StringFallback("", "fallback value")
 }
