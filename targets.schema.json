@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "targets": {
+      "items": {
+        "properties": {
+          "targetTime": {
+            "type": "string",
+            "pattern": "^[UL]?[0-9]{1,6}$",
+            "description": "[<TZ>]<Hours>[<Minutes>[<Seconds>]] were <TZ> is 'U' for UTC or 'L' for Local Time (default)"
+          },
+          "targetLabel": {
+            "type": "string",
+            "description": "Replacement text for 'Target Time' label"
+          },
+          "alarmSound": {
+            "type": "string",
+            "enum": ["navy-01-wanking-of-combat", "navy-02-breakfast", "navy-12-lunch-time", "navy-14-wake-up", "navy-22-wanking-of-combat"],
+            "description": "Alarm sound to be played in the end"
+          }
+        },
+        "required": [
+          "targetTime"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "targets"
+  ],
+  "type": "object"
+}
