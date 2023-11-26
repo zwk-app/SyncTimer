@@ -152,14 +152,15 @@ jobs:
           name: windows
           path: |
             SyncTimer.exe
-      - name: "Requirements"
+      - name: "Prepare Release"
         run: |
-          ls -lah
-          find . -name "SyncTimer.*"
+          mv ./SyncTimer.exe/SyncTimer.exe .
+          mv ./SyncTimer.tar.xz/SyncTimer.tar.xz .
+          mv ./SyncTimer.apk/SyncTimer.apk .
           chmod +x github.sh
           ./github.sh github-environment
           ./github.sh build-summary
-      - name: "Release"
+      - name: "Create Release"
         if: ${{ inputs.newRelease }}
         uses: actions/github-script@v7
         with:
@@ -213,7 +214,7 @@ jobs:
                 repo: context.repo.repo,
                 release_id: process.env.RELEASE_ID,
                 name: "SyncTimer.exe",
-                data: await fs.readFileSync("./SyncTimer/SyncTimer.exe")
+                data: await fs.readFileSync("SyncTimer.exe")
               });
             } catch (error) {
               core.setFailed(`SyncTimer.exe: ${error.message}`);
@@ -225,7 +226,7 @@ jobs:
                 repo: context.repo.repo,
                 release_id: process.env.RELEASE_ID,
                 name: "SyncTimer.tar.xz",
-                data: await fs.readFileSync("./SyncTimer/SyncTimer.tar.xz")
+                data: await fs.readFileSync("SyncTimer.tar.xz")
               });
             } catch (error) {
               core.setFailed(`SyncTimer.tar.xz: ${error.message}`);
@@ -237,7 +238,7 @@ jobs:
                 repo: context.repo.repo,
                 release_id: process.env.RELEASE_ID,
                 name: "SyncTimer.apk",
-                data: await fs.readFileSync("./SyncTimer/SyncTimer.apk")
+                data: await fs.readFileSync("SyncTimer.apk")
               });
             } catch (error) {
               core.setFailed(`SyncTimer.apk: ${error.message}`);
