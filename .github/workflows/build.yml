@@ -27,7 +27,7 @@ on:
         description: 'Create Release'
         required: true
         type: boolean
-        default: false
+        default: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -35,7 +35,7 @@ concurrency:
 
 jobs:
 
-  linux-build:
+  linux:
     runs-on: ubuntu-latest
     steps:
       - name: "CheckOut"
@@ -61,12 +61,12 @@ jobs:
       - name: "Linux Upload"
         uses: actions/upload-artifact@v3
         with:
-          name: linux-build
+          name: linux
           path: |
             SyncTimer.tar.xz
           retention-days: 3
 
-  android-build:
+  android:
     runs-on: ubuntu-latest
     steps:
       - name: "CheckOut"
@@ -92,12 +92,12 @@ jobs:
       - name: "Android Upload"
         uses: actions/upload-artifact@v3
         with:
-          name: android-build
+          name: android
           path: |
             SyncTimer.apk
           retention-days: 3
 
-  windows-build:
+  windows:
     runs-on: ubuntu-latest
     steps:
       - name: "CheckOut"
@@ -123,13 +123,13 @@ jobs:
       - name: "Windows Upload"
         uses: actions/upload-artifact@v3
         with:
-          name: windows-build
+          name: windows
           path: |
             SyncTimer.exe
           retention-days: 3
 
   release:
-    needs: [linux-build, android-build, windows-build]
+    needs: [linux, android, windows]
     runs-on: ubuntu-latest
     steps:
       - name: "CheckOut"
@@ -138,22 +138,22 @@ jobs:
         run: |
           chmod +x github.sh
           ./github.sh github-environment
-      - name: "Linux Build"
+      - name: "Linux"
         uses: actions/download-artifact@v3
         with:
-          name: linux-build
+          name: linux
           path: |
             SyncTimer.tar.xz
-      - name: "Android Build"
+      - name: "Android"
         uses: actions/download-artifact@v3
         with:
-          name: android-build
+          name: android
           path: |
             SyncTimer.apk
-      - name: "Windows Build"
+      - name: "Windows"
         uses: actions/download-artifact@v3
         with:
-          name: windows-build
+          name: windows
           path: |
             SyncTimer.exe
       - name: "Build Summary"
@@ -167,11 +167,19 @@ jobs:
           github-token: "${{ secrets.GIT_BOT_TOKEN }}"
           script: |
             if (!process.env.RELEASE_NAME) {
+              core.setFailed("The environment variable RELEASE_NAME is not defined.")
+              return;
+            }
+            if (!process.env.RELEASE_TAG) {
               core.setFailed("The environment variable RELEASE_TAG is not defined.")
               return;
             }
+            console.log("Repository   : ", context.repo.repo);
+            console.log("Owner        : ", context.repo.owner);
+            console.log("Release Name : ", process.env.RELEASE_NAME);
+            console.log("Release Tag  : ", process.env.RELEASE_TAG);
             try {
-              const release = await github.rest.repos.createRelease({
+              const releaseCreation = await github.rest.repos.createRelease({
                 draft: true,
                 generate_release_notes: true,
                 name: process.env.RELEASE_NAME,
@@ -181,52 +189,61 @@ jobs:
                 tag_name: process.env.RELEASE_TAG,
               });
             } catch (error) {
-              core.setFailed("Release creation failed: "+ error.message);
+              core.setFailed("Release: "+ error.message);
             }
+            console.log("Release Id   : ", releaseCreation.data.id);
+            
+            const releaseResult = await github.repos.getReleaseByTag({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              process.env.RELEASE_TAG
+            });
+            console.log("Release Id   : ", releaseResult.data.id);
+            
             try {
               const fs = require('fs');
               await github.repos.uploadReleaseAsset({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                release_id: release.data.id,
+                release_id: releaseResult.data.id,
                 name: "SyncTimer.md",
                 data: await fs.readFileSync("SyncTimer.md")
               });
             } catch (error) {
-              core.setFailed("SyncTimer.md upload failed: "+ error.message);
+              core.setFailed("SyncTimer.md: "+ error.message);
             }
             try {
               await github.repos.uploadReleaseAsset({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                release_id: release.data.id,
+                release_id: releaseResult.data.id,
                 name: "SyncTimer.exe",
                 data: await fs.readFileSync("SyncTimer.exe")
               });
             } catch (error) {
-              core.setFailed("SyncTimer.exe upload failed: "+ error.message);
+              core.setFailed("SyncTimer.exe: "+ error.message);
             }
             try {
               await github.repos.uploadReleaseAsset({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                release_id: release.data.id,
+                release_id: releaseResult.data.id,
                 name: "SyncTimer.tar.xz",
                 data: await fs.readFileSync("SyncTimer.tar.xz")
               });
             } catch (error) {
-              core.setFailed("SyncTimer.tar.xz upload failed: "+ error.message);
+              core.setFailed("SyncTimer.tar.xz: "+ error.message);
             }
             try {
               await github.repos.uploadReleaseAsset({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                release_id: release.data.id,
+                release_id: releaseResult.data.id,
                 name: "SyncTimer.apk",
                 data: await fs.readFileSync("SyncTimer.apk")
               });
             } catch (error) {
-              core.setFailed("SyncTimer.apk upload failed: "+ error.message);
+              core.setFailed("SyncTimer.apk: "+ error.message);
             }
       - name: "Build Summary Upload"
         uses: actions/upload-artifact@v3
