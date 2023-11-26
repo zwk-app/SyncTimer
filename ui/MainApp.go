@@ -107,6 +107,8 @@ func MainApp() {
 	}
 	FyneApp = app.NewWithID(config.Name())
 	config.LoadFyneSettings(FyneApp)
+	timer.SetTargetJson(config.Target().JsonName)
+	timer.NextTarget()
 	AlertLoop()
 	FyneWindow = FyneApp.NewWindow(config.Title())
 	FyneWindow.Resize(fyne.NewSize(320, 460))
