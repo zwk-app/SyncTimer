@@ -13,3 +13,6 @@ SyncTimer.*
 *.test
 *.out
 *.log
+*.old
+*.bak
+*.tmp

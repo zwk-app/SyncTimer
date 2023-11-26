@@ -149,6 +149,7 @@ function FileCheckSum() {
 }
 
 function BuildSummary() {
+  BUILD_PATH="${1}"
   BUILD_SUMMARY_MD="$(ModName).md"
   cat << EOF_BUILD_SUMMARY_MD > "${BUILD_SUMMARY_MD}"
 # $(AppName) v$(AppVersion)
@@ -165,15 +166,16 @@ function BuildSummary() {
 |OS|File|SHA256|
 |:---:|:----|:----|
 EOF_BUILD_SUMMARY_MD
-  FileCheckSum "Windows" "SyncTimer.exe"
-  FileCheckSum "Linux" "SyncTimer.tar.xz"
-  FileCheckSum "Android" "SyncTimer.apk"
+  FileCheckSum "Windows" "${BUILD_PATH}SyncTimer.exe"
+  FileCheckSum "Linux" "${BUILD_PATH}SyncTimer.tar.xz"
+  FileCheckSum "Android" "${BUILD_PATH}SyncTimer.apk"
+  mv "${BUILD_SUMMARY_MD}" "${BUILD_PATH}"
 }
 
 [ ${#} -lt 1 ] && Usage "Missing parameter"
 SCRIPT_ACTION="${1}"
-SCRIPT_SUBACTION=""
-[ ${#} -gt 1 ] && SCRIPT_SUBACTION="${2}"
+SCRIPT_PARAMETER=""
+[ ${#} -gt 1 ] && SCRIPT_PARAMETER="${2}"
 case "${SCRIPT_ACTION}" in
 	github-environment)
 	  [ ${#} -gt 1 ] && Usage "Too many parameters for ${SCRIPT_ACTION}"
@@ -190,11 +192,12 @@ case "${SCRIPT_ACTION}" in
 	package|release)
 	  [ ${#} -gt 2 ] && Usage "Too many parameters for ${SCRIPT_ACTION}"
 	  [ ${#} -lt 2 ] && Usage "Missing parameters for ${SCRIPT_ACTION}"
-	  FyneExec "${SCRIPT_ACTION}" "${SCRIPT_SUBACTION}"
+	  FyneExec "${SCRIPT_ACTION}" "${SCRIPT_PARAMETER}"
 		;;
 	build-summary)
-	  [ ${#} -gt 1 ] && Usage "Too many parameters for ${SCRIPT_ACTION}"
-		BuildSummary
+	  [ ${#} -gt 2 ] && Usage "Too many parameters for ${SCRIPT_ACTION}"
+	  [ ${#} -lt 2 ] && Usage "Missing parameters for ${SCRIPT_ACTION}"
+		BuildSummary "${SCRIPT_PARAMETER}"
 		;;
   test)
     AndroidNDK
