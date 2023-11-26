@@ -203,7 +203,7 @@ jobs:
                 repo: context.repo.repo,
                 release_id: process.env.RELEASE_ID,
                 name: "SyncTimer.md",
-                data: await fs.readFileSync("SyncTimer/SyncTimer.md")
+                data: await fs.readFileSync("SyncTimer.md")
               });
             } catch (error) {
               core.setFailed(`SyncTimer.md: ${error.message}`);
