@@ -65,13 +65,13 @@ jobs:
             console.log(`Release Tag  : '${process.env.RELEASE_TAG}'`);
             try {
               const response = await github.rest.repos.createRelease({
-                draft: true,
-                generate_release_notes: true,
-                name: process.env.RELEASE_NAME,
                 owner: context.repo.owner,
-                prerelease: false,
                 repo: context.repo.repo,
+                name: process.env.RELEASE_NAME,
                 tag_name: process.env.RELEASE_TAG,
+                generate_release_notes: true,
+                prerelease: false,
+                draft: true,
               });
               core.exportVariable('RELEASE_ID', response.data.id);
               core.exportVariable('RELEASE_UPLOAD_URL', response.data.upload_url);
@@ -82,7 +82,7 @@ jobs:
               return;
             }
             try {
-              await github.repos.uploadReleaseAsset({
+              const result = await github.rest.repos.uploadReleaseAsset({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 release_id: process.env.RELEASE_ID,
