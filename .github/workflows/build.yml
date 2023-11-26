@@ -87,7 +87,7 @@ jobs:
                 repo: context.repo.repo,
                 release_id: ${process.env.RELEASE_ID},
                 name: "version.go",
-                data: await fs.readFileSync("version.go")
+                data: await fs.readFileSync("version.go"),
               });
             } catch (error) {
               core.setFailed(`version.go: ${error.message}`);
