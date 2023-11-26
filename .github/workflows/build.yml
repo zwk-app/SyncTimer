@@ -166,6 +166,7 @@ jobs:
         with:
           github-token: "${{ secrets.GIT_BOT_TOKEN }}"
           script: |
+            const fs = require('fs');
             if (!process.env.RELEASE_NAME) {
               core.setFailed("The environment variable RELEASE_NAME is not defined.")
               return;
@@ -189,19 +190,20 @@ jobs:
                 tag_name: process.env.RELEASE_TAG,
               });
             } catch (error) {
-              core.setFailed("Release: "+ error.message);
+              core.setFailed("Create Release: "+ error.message);
             }
-            console.log("Release Id   : ", releaseCreation.data.id);
-            
-            const releaseResult = await github.repos.getReleaseByTag({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              process.env.RELEASE_TAG
-            });
-            console.log("Release Id   : ", releaseResult.data.id);
-            
             try {
-              const fs = require('fs');
+              console.log("Release Id   : ", releaseCreation.data.id);
+              const releaseResult = await github.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                process.env.RELEASE_TAG
+              });
+              console.log("Release Id   : ", releaseResult.data.id);
+            } catch (error) {
+              core.setFailed("Get Release: "+ error.message);
+            }
+            try {
               await github.repos.uploadReleaseAsset({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
