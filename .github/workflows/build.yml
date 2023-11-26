@@ -35,7 +35,101 @@ concurrency:
 
 jobs:
 
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "CheckOut"
+        uses: actions/checkout@v4
+      - name: "Go Setup"
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.21
+      - name: "Go Cache"
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-golang-linux
+          restore-keys: |
+            ${{ runner.os }}-golang-linux
+      - name: "Linux Build"
+        run: |
+          chmod +x github.sh
+          ./github.sh build-requirements
+          ./github.sh package linux
+      - name: "Linux Upload"
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux
+          path: |
+            SyncTimer.tar.xz
+          retention-days: 3
+
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "CheckOut"
+        uses: actions/checkout@v4
+      - name: "Go Setup"
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.21
+      - name: "Go Cache"
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-golang-android
+          restore-keys: |
+            ${{ runner.os }}-golang-android
+      - name: "Android Build"
+        run: |
+          chmod +x github.sh
+          ./github.sh build-requirements
+          ./github.sh package android
+      - name: "Android Upload"
+        uses: actions/upload-artifact@v3
+        with:
+          name: android
+          path: |
+            SyncTimer.apk
+          retention-days: 3
+
+  windows:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "CheckOut"
+        uses: actions/checkout@v4
+      - name: "Go Setup"
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.21
+      - name: "Go Cache"
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-golang-windows
+          restore-keys: |
+            ${{ runner.os }}-golang-windows
+      - name: "Windows Build"
+        run: |
+          chmod +x github.sh
+          ./github.sh build-requirements
+          ./github.sh package windows
+      - name: "Windows Upload"
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows
+          path: |
+            SyncTimer.exe
+          retention-days: 3
+
   release:
+    needs: [linux, android, windows]
     runs-on: ubuntu-latest
     steps:
       - name: "CheckOut"
@@ -44,6 +138,28 @@ jobs:
         run: |
           chmod +x github.sh
           ./github.sh github-environment
+      - name: "Linux"
+        uses: actions/download-artifact@v3
+        with:
+          name: linux
+          path: |
+            SyncTimer.tar.xz
+      - name: "Android"
+        uses: actions/download-artifact@v3
+        with:
+          name: android
+          path: |
+            SyncTimer.apk
+      - name: "Windows"
+        uses: actions/download-artifact@v3
+        with:
+          name: windows
+          path: |
+            SyncTimer.exe
+      - name: "Build Summary"
+        run: |
+          chmod +x github.sh
+          ./github.sh build-summary
       - name: "Release"
         if: ${{ inputs.newRelease }}
         uses: actions/github-script@v7
@@ -86,11 +202,47 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 release_id: process.env.RELEASE_ID,
-                name: "version.go",
-                data: await fs.readFileSync("version.go"),
+                name: "SyncTimer.md",
+                data: await fs.readFileSync("SyncTimer.md")
               });
             } catch (error) {
-              core.setFailed(`version.go: ${error.message}`);
+              core.setFailed(`SyncTimer.md: $(error.message)`);
+              return;
+            }
+            try {
+              const result = await github.rest.repos.uploadReleaseAsset({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: process.env.RELEASE_ID,
+                name: "SyncTimer.exe",
+                data: await fs.readFileSync("SyncTimer.exe")
+              });
+            } catch (error) {
+              core.setFailed(`SyncTimer.exe: $(error.message)`);
+              return;
+            }
+            try {
+              const result = await github.rest.repos.uploadReleaseAsset({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: process.env.RELEASE_ID,
+                name: "SyncTimer.tar.xz",
+                data: await fs.readFileSync("SyncTimer.tar.xz")
+              });
+            } catch (error) {
+              core.setFailed(`SyncTimer.tar.xz: $(error.message)`);
+              return;
+            }
+            try {
+              const result = await github.rest.repos.uploadReleaseAsset({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: process.env.RELEASE_ID,
+                name: "SyncTimer.apk",
+                data: await fs.readFileSync("SyncTimer.apk")
+              });
+            } catch (error) {
+              core.setFailed(`SyncTimer.apk: $(error.message)`);
               return;
             }
       - name: "Build Summary Upload"
@@ -100,3 +252,25 @@ jobs:
           path: |
             SyncTimer.md
           retention-days: 3
+
+  build-increment:
+    needs: [release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: "CheckOut"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GIT_BOT_TOKEN }}
+      - name: "Git Setup"
+        run: |
+          git config --global user.name "${{ vars.GIT_BOT_USER }}"
+          git config --global user.email "${{ vars.GIT_BOT_EMAIL }}"
+      - name: "Build Increment"
+        run: |
+          chmod +x github.sh
+          ./github.sh build-increment
+      - name: "Commit & Push"
+        run: |
+          git commit -a -m "Build Auto-Increment"
+          git push --force
