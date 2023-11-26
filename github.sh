@@ -150,7 +150,7 @@ function FileCheckSum() {
 
 function BuildSummary() {
   BUILD_PATH="${1}"
-  BUILD_SUMMARY_MD="${BUILD_PATH}$(ModName).md"
+  BUILD_SUMMARY_MD="$(ModName).md"
   cat << EOF_BUILD_SUMMARY_MD > "${BUILD_SUMMARY_MD}"
 # $(AppName) v$(AppVersion)
 ## What's Changed
