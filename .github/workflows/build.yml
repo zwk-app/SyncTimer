@@ -154,12 +154,13 @@ jobs:
             SyncTimer.exe
       - name: "Prepare Release"
         run: |
-          mv ./SyncTimer.exe/SyncTimer.exe .
-          mv ./SyncTimer.tar.xz/SyncTimer.tar.xz .
-          mv ./SyncTimer.apk/SyncTimer.apk .
+          mkdir release
+          mv ./SyncTimer.exe/SyncTimer.exe ./release/
+          mv ./SyncTimer.tar.xz/SyncTimer.tar.xz ./release/
+          mv ./SyncTimer.apk/SyncTimer.apk ./release/
           chmod +x github.sh
           ./github.sh github-environment
-          ./github.sh build-summary
+          ./github.sh build-summary ./release/
       - name: "Create Release"
         if: ${{ inputs.newRelease }}
         uses: actions/github-script@v7
@@ -202,7 +203,7 @@ jobs:
                 repo: context.repo.repo,
                 release_id: process.env.RELEASE_ID,
                 name: "SyncTimer.md",
-                data: await fs.readFileSync("SyncTimer.md")
+                data: await fs.readFileSync("./release/SyncTimer.md")
               });
             } catch (error) {
               core.setFailed(`SyncTimer.md: ${error.message}`);
@@ -214,7 +215,7 @@ jobs:
                 repo: context.repo.repo,
                 release_id: process.env.RELEASE_ID,
                 name: "SyncTimer.exe",
-                data: await fs.readFileSync("SyncTimer.exe")
+                data: await fs.readFileSync("./release/SyncTimer.exe")
               });
             } catch (error) {
               core.setFailed(`SyncTimer.exe: ${error.message}`);
@@ -226,7 +227,7 @@ jobs:
                 repo: context.repo.repo,
                 release_id: process.env.RELEASE_ID,
                 name: "SyncTimer.tar.xz",
-                data: await fs.readFileSync("SyncTimer.tar.xz")
+                data: await fs.readFileSync("./release/SyncTimer.tar.xz")
               });
             } catch (error) {
               core.setFailed(`SyncTimer.tar.xz: ${error.message}`);
@@ -238,7 +239,7 @@ jobs:
                 repo: context.repo.repo,
                 release_id: process.env.RELEASE_ID,
                 name: "SyncTimer.apk",
-                data: await fs.readFileSync("SyncTimer.apk")
+                data: await fs.readFileSync("./release/SyncTimer.apk")
               });
             } catch (error) {
               core.setFailed(`SyncTimer.apk: ${error.message}`);
