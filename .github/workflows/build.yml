@@ -64,7 +64,7 @@ jobs:
             console.log(`Release Name : '${process.env.RELEASE_NAME}'`);
             console.log(`Release Tag  : '${process.env.RELEASE_TAG}'`);
             try {
-              const response = await github.repos.createRelease({
+              const response = await github.rest.repos.createRelease({
                 draft: true,
                 generate_release_notes: true,
                 name: process.env.RELEASE_NAME,
