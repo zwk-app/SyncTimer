@@ -108,6 +108,7 @@ jobs:
           retention-days: 3
 
   build-increment:
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - name: CheckOut
