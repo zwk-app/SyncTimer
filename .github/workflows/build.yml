@@ -180,7 +180,7 @@ jobs:
             console.log(`Release Name : '${process.env.RELEASE_NAME}'`);
             console.log(`Release Tag  : '${process.env.RELEASE_TAG}'`);
             try {
-              const releaseCreation = await github.repos.createRelease({
+              const response = await github.repos.createRelease({
                 draft: false,
                 generate_release_notes: true,
                 name: process.env.RELEASE_NAME,
@@ -189,19 +189,20 @@ jobs:
                 repo: context.repo.repo,
                 tag_name: process.env.RELEASE_TAG,
               });
-              console.log(`Release Id   : '${releaseCreation.data.id}'`);
+              core.exportVariable('RELEASE_ID', response.data.id);
+              core.exportVariable('RELEASE_UPLOAD_URL', response.data.upload_url);
+              console.log(`Release Id   : '${response.data.id}'`);
             } catch (error) {
               core.setFailed("Create Release: "+ error.message);
               return;
             }
             try {
-              console.log("Release Id   : "+ releaseCreation.data.id);
-              const releaseResult = await github.repos.getReleaseByTag({
+              const release = await github.repos.getReleaseByTag({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 tag_name: process.env.RELEASE_TAG
               });
-              console.log(`Release Id   : '${releaseResult.data.id}'`);
+              console.log(`Release Id   : '${release.data.id}'`);
             } catch (error) {
               core.setFailed("Get Release: "+ error.message);
               return;
@@ -210,7 +211,7 @@ jobs:
               await github.repos.uploadReleaseAsset({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                release_id: releaseResult.data.id,
+                release_id: release.data.id,
                 name: "version.go",
                 data: await fs.readFileSync("version.go")
               });
