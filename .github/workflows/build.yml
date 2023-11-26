@@ -206,7 +206,7 @@ jobs:
                 data: await fs.readFileSync("SyncTimer.md")
               });
             } catch (error) {
-              core.setFailed(`SyncTimer.md: $(error.message)`);
+              core.setFailed(`SyncTimer.md: ${error.message}`);
               return;
             }
             try {
@@ -215,10 +215,10 @@ jobs:
                 repo: context.repo.repo,
                 release_id: process.env.RELEASE_ID,
                 name: "SyncTimer.exe",
-                data: await fs.readFileSync("SyncTimer.exe")
+                data: await fs.readFileSync("SyncTimer/SyncTimer.exe")
               });
             } catch (error) {
-              core.setFailed(`SyncTimer.exe: $(error.message)`);
+              core.setFailed(`SyncTimer.exe: ${error.message}`);
               return;
             }
             try {
@@ -227,10 +227,10 @@ jobs:
                 repo: context.repo.repo,
                 release_id: process.env.RELEASE_ID,
                 name: "SyncTimer.tar.xz",
-                data: await fs.readFileSync("SyncTimer.tar.xz")
+                data: await fs.readFileSync("SyncTimer/SyncTimer.tar.xz")
               });
             } catch (error) {
-              core.setFailed(`SyncTimer.tar.xz: $(error.message)`);
+              core.setFailed(`SyncTimer.tar.xz: ${error.message}`);
               return;
             }
             try {
@@ -239,10 +239,10 @@ jobs:
                 repo: context.repo.repo,
                 release_id: process.env.RELEASE_ID,
                 name: "SyncTimer.apk",
-                data: await fs.readFileSync("SyncTimer.apk")
+                data: await fs.readFileSync("SyncTimer/SyncTimer.apk")
               });
             } catch (error) {
-              core.setFailed(`SyncTimer.apk: $(error.message)`);
+              core.setFailed(`SyncTimer.apk: ${error.message}`);
               return;
             }
       - name: "Build Summary Upload"
