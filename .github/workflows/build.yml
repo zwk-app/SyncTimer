@@ -215,7 +215,7 @@ jobs:
                 repo: context.repo.repo,
                 release_id: process.env.RELEASE_ID,
                 name: "SyncTimer.exe",
-                data: await fs.readFileSync("SyncTimer/SyncTimer.exe")
+                data: await fs.readFileSync("./SyncTimer/SyncTimer.exe")
               });
             } catch (error) {
               core.setFailed(`SyncTimer.exe: ${error.message}`);
@@ -227,7 +227,7 @@ jobs:
                 repo: context.repo.repo,
                 release_id: process.env.RELEASE_ID,
                 name: "SyncTimer.tar.xz",
-                data: await fs.readFileSync("SyncTimer/SyncTimer.tar.xz")
+                data: await fs.readFileSync("./SyncTimer/SyncTimer.tar.xz")
               });
             } catch (error) {
               core.setFailed(`SyncTimer.tar.xz: ${error.message}`);
@@ -239,7 +239,7 @@ jobs:
                 repo: context.repo.repo,
                 release_id: process.env.RELEASE_ID,
                 name: "SyncTimer.apk",
-                data: await fs.readFileSync("SyncTimer/SyncTimer.apk")
+                data: await fs.readFileSync("./SyncTimer/SyncTimer.apk")
               });
             } catch (error) {
               core.setFailed(`SyncTimer.apk: ${error.message}`);
