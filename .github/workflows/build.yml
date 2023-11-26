@@ -180,8 +180,8 @@ jobs:
             console.log("Release Name : "+ process.env.RELEASE_NAME);
             console.log("Release Tag  : "+ process.env.RELEASE_TAG);
             try {
-              const releaseCreation = await github.rest.repos.createRelease({
-                draft: true,
+              const releaseCreation = await github.repos.createRelease({
+                draft: false,
                 generate_release_notes: true,
                 name: process.env.RELEASE_NAME,
                 owner: context.repo.owner,
@@ -189,18 +189,19 @@ jobs:
                 repo: context.repo.repo,
                 tag_name: process.env.RELEASE_TAG,
               });
+              console.log(releaseCreation);
             } catch (error) {
               core.setFailed("Create Release: "+ error.message);
               return;
             }
             try {
-              console.log("Release Id   : ", releaseCreation.data.id);
+              console.log("Release Id   : "+ releaseCreation.data.id);
               const releaseResult = await github.repos.getReleaseByTag({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                process.env.RELEASE_TAG
+                tag_name: process.env.RELEASE_TAG
               });
-              console.log("Release Id   : ", releaseResult.data.id);
+              console.log("Release Id   : "+ releaseResult.data.id);
             } catch (error) {
               core.setFailed("Get Release: "+ error.message);
               return;
