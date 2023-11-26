@@ -149,7 +149,6 @@ function FileCheckSum() {
 }
 
 function BuildSummary() {
-  BUILD_PATH="${1}"
   BUILD_SUMMARY_MD="$(ModName).md"
   cat << EOF_BUILD_SUMMARY_MD > "${BUILD_SUMMARY_MD}"
 # $(AppName) v$(AppVersion)
@@ -166,9 +165,9 @@ function BuildSummary() {
 |OS|File|SHA256|
 |:---:|:----|:----|
 EOF_BUILD_SUMMARY_MD
-  FileCheckSum "Windows" "${BUILD_PATH}SyncTimer.exe"
-  FileCheckSum "Linux" "${BUILD_PATH}SyncTimer.tar.xz"
-  FileCheckSum "Android" "${BUILD_PATH}SyncTimer.apk"
+  FileCheckSum "Windows" "SyncTimer.exe"
+  FileCheckSum "Linux" "SyncTimer.tar.xz"
+  FileCheckSum "Android" "SyncTimer.apk"
 }
 
 [ ${#} -lt 1 ] && Usage "Missing parameter"
@@ -194,9 +193,8 @@ case "${SCRIPT_ACTION}" in
 	  FyneExec "${SCRIPT_ACTION}" "${SCRIPT_SUBACTION}"
 		;;
 	build-summary)
-	  [ ${#} -gt 2 ] && Usage "Too many parameters for ${SCRIPT_ACTION}"
-	  [ ${#} -lt 2 ] && Usage "Missing parameters for ${SCRIPT_ACTION}"
-		BuildSummary "${SCRIPT_SUBACTION}"
+	  [ ${#} -gt 1 ] && Usage "Too many parameters for ${SCRIPT_ACTION}"
+		BuildSummary
 		;;
   test)
     AndroidNDK
