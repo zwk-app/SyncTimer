@@ -191,7 +191,6 @@ jobs:
               });
               core.exportVariable('RELEASE_ID', response.data.id);
               core.exportVariable('RELEASE_UPLOAD_URL', response.data.upload_url);
-              console.log(`Release Id   : '${response.data.id}'`);
             } catch (error) {
               core.setFailed("Create Release: "+ error.message);
               return;
