@@ -175,10 +175,10 @@ jobs:
               core.setFailed("The environment variable RELEASE_TAG is not defined.")
               return;
             }
-            // console.log("Repository   : ", context.repo.repo);
-            // console.log("Owner        : ", context.repo.owner);
-            // console.log("Release Name : ", process.env.RELEASE_NAME);
-            // console.log("Release Tag  : ", process.env.RELEASE_TAG);
+            console.log("Repository   : "+ context.repo.repo);
+            console.log("Owner        : "+ context.repo.owner);
+            console.log("Release Name : "+ process.env.RELEASE_NAME);
+            console.log("Release Tag  : "+ process.env.RELEASE_TAG);
             try {
               const releaseCreation = await github.rest.repos.createRelease({
                 draft: true,
@@ -191,6 +191,7 @@ jobs:
               });
             } catch (error) {
               core.setFailed("Create Release: "+ error.message);
+              return;
             }
             try {
               console.log("Release Id   : ", releaseCreation.data.id);
@@ -202,6 +203,7 @@ jobs:
               console.log("Release Id   : ", releaseResult.data.id);
             } catch (error) {
               core.setFailed("Get Release: "+ error.message);
+              return;
             }
             try {
               await github.repos.uploadReleaseAsset({
@@ -213,6 +215,7 @@ jobs:
               });
             } catch (error) {
               core.setFailed("version.go: "+ error.message);
+              return;
             }
             // try {
             //   await github.repos.uploadReleaseAsset({
