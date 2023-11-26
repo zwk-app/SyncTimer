@@ -3,7 +3,7 @@
 [![Build Packages](https://github.com/zwk-app/SyncTimer/actions/workflows/build.yml/badge.svg)](https://github.com/zwk-app/SyncTimer/actions/workflows/build.yml)
 [![VirusTotal](https://github.com/zwk-app/SyncTimer/actions/workflows/virustotal.yml/badge.svg)](https://github.com/zwk-app/SyncTimer/actions/workflows/virustotal.yml)
 
-![SyncTimer screenshot](./res/SyncTimer.screenshot.small.png)
+[![SyncTimer screenshot](./res/SyncTimer.screenshot.small.png)](https://raw.githubusercontent.com/zwk-app/SyncTimer/main/res/SyncTimer.screenshot.png)
 
 A simple Go app for displaying remaining time
 
