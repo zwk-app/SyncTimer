@@ -133,19 +133,19 @@ jobs:
       - name: "CheckOut"
         uses: actions/checkout@v4
       - name: "Linux"
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: linux
           path: |
             SyncTimer.tar.xz
       - name: "Android"
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: android
           path: |
             SyncTimer.apk
       - name: "Windows"
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: windows
           path: |
