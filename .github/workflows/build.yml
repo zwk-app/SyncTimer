@@ -55,7 +55,7 @@ jobs:
           ./github.sh build-requirements
           ./github.sh package linux
       - name: "Linux Upload"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linux
           path: |
@@ -87,7 +87,7 @@ jobs:
           ./github.sh build-requirements
           ./github.sh package android
       - name: "Android Upload"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: android
           path: |
@@ -119,7 +119,7 @@ jobs:
           ./github.sh build-requirements
           ./github.sh package windows
       - name: "Windows Upload"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows
           path: |
@@ -244,7 +244,7 @@ jobs:
               return;
             }
       - name: "Build Summary Upload"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: release
           path: |
